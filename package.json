@@ -8,6 +8,7 @@
 		"node": ">=22.0.0"
 	},
 	"scripts": {
+		"init": "node --experimental-strip-types src/init-config.ts",
 		"dev": "node --experimental-strip-types src/index.ts",
 		"audit:sources": "node --experimental-strip-types src/audit-sources.ts",
 		"audit:sources:save": "node --experimental-strip-types src/audit-sources.ts --save",

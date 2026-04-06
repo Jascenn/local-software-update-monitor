@@ -33,9 +33,10 @@
 git clone https://github.com/Jascenn/local-software-update-monitor.git
 cd local-software-update-monitor
 npm install
-cp monitor.config.example.json monitor.config.json
 npm run dev
 ```
+
+首次启动会自动创建 `monitor.config.json`，并优先把本机能直接提取更新源的 App 自动接进来。
 
 打开：
 
@@ -47,6 +48,7 @@ http://127.0.0.1:4123
 
 ```bash
 npm run dev
+npm run init
 npm run check
 npm run build
 npm run audit:sources:save
@@ -65,7 +67,7 @@ npm run cli -- --view today
 - [src](./src): 本地监控服务、CLI、API 和网页看板
 - [site](./site): 对外官网与说明页
 - [reports](./reports): 发布、审计和方案文档
-- [monitor.config.example.json](./monitor.config.example.json): 配置示例
+- [monitor.config.example.json](./monitor.config.example.json): 高级手工配置示例
 
 ## 进一步说明
 
