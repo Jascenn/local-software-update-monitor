@@ -112,6 +112,29 @@
 			line-height: 1.7;
 		}
 
+		code {
+			padding: 0.1em 0.38em;
+			border-radius: 0.45em;
+			background: #f3f4f6;
+			font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+			font-size: 0.88em;
+			color: #374151;
+		}
+
+		.code-block {
+			margin-top: 12px;
+			padding: 12px 14px;
+			border: 1px solid var(--line);
+			border-radius: 14px;
+			background: #fcfcfc;
+			font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+			font-size: 0.84rem;
+			line-height: 1.8;
+			color: #374151;
+			white-space: pre-wrap;
+			word-break: break-word;
+		}
+
 		.hero {
 			padding: 28px 0 22px;
 			border-bottom: 1px solid var(--line);
@@ -383,8 +406,6 @@
 	</nav>
 
 	<main>
-		<div class="notice">这是 `Lingyi App Watch` 的介绍页和上手说明。这里展示的是公开示意内容，不会读取你的真实软件列表，也不会暴露你的个人设备数据。</div>
-
 		<section class="hero" id="overview">
 			<div class="kicker">macOS 软件更新助手 · 本地运行 · v0.3.0</div>
 			<h1>帮你把 Mac 上的软件更新，整理成一张真正能做决定的清单。</h1>
@@ -439,40 +460,52 @@
 		<section class="section" id="guide">
 			<div class="section-head">
 				<div>
-					<h2>第一次使用怎么开始</h2>
-					<p>你不需要一次就把所有软件都配置完。先跑起来，再逐步把常用软件补进来，通常更轻松。</p>
+					<h2>怎么使用</h2>
+					<p>第一次使用时，先把面板跑起来，再逐步补齐你关心的软件来源。下面这 4 步就是最短上手路径。</p>
 				</div>
 			</div>
 			<div class="feature-grid">
 				<article class="feature-card">
 					<span class="tag">第 1 步</span>
-					<strong>在自己的 Mac 上启动服务</strong>
-					<p>启动后，系统会先自动发现本机的软件、版本和部分安装来源。你可以先看到一份基础清单。</p>
+					<strong>下载项目并安装依赖</strong>
+					<p>当前版本适合直接在自己的 Mac 上运行。先拉取项目，再安装依赖。</p>
+					<div class="code-block">git clone https://github.com/Jascenn/local-software-update-monitor.git
+cd local-software-update-monitor
+npm install</div>
 				</article>
 				<article class="feature-card">
 					<span class="tag">第 2 步</span>
-					<strong>补齐你真正关心的软件</strong>
-					<p>把官网更新页、GitHub Release 或其他稳定版本源补进配置后，检测结果会更完整、更实用。</p>
+					<strong>复制配置并启动本地面板</strong>
+					<p>复制示例配置后直接启动服务，浏览器打开本地地址就能看到第一版软件清单。</p>
+					<div class="code-block">cp monitor.config.example.json monitor.config.json
+npm run dev
+
+打开 http://127.0.0.1:4123</div>
 				</article>
 				<article class="feature-card">
 					<span class="tag">第 3 步</span>
-					<strong>给敏感软件做人工标记</strong>
-					<p>如果某个软件暂时不要动，或者你想等一等再看，可以直接标记成“不要升级”“重点关注”或“待核验”。</p>
+					<strong>补齐你关心的软件来源</strong>
+					<p>系统会先自动识别一部分本机软件。接下来把官网更新页、GitHub Release、JSON 接口或其他稳定来源补进 <code>monitor.config.json</code>，结果会更完整。</p>
 				</article>
 				<article class="feature-card">
 					<span class="tag">第 4 步</span>
-					<strong>按优先级处理更新</strong>
-					<p>每天先看今天要处理的更新，再看风险区。能一键升级的直接处理，其他项目按提示手动确认。</p>
+					<strong>每天先看“今天处理”和“风险区”</strong>
+					<p>日常使用时，优先看今天要处理的更新，再看谨慎升级和第三方来源的软件。对敏感软件可以直接打标记，例如“不要升级”“重点关注”“待核验”。</p>
 				</article>
 				<article class="feature-card">
-					<span class="tag">使用方式</span>
-					<strong>网页和命令行都能用</strong>
-					<p>你可以在网页里筛选、排序、打标记，也可以在终端里快速查看状态，适合不同的使用习惯。</p>
+					<span class="tag">网页使用</span>
+					<strong>适合做筛选、排序和批量处理</strong>
+					<p>你可以在网页里按状态、来源和策略筛选，也可以多选后批量标记。能一键升级的软件会直接给出操作入口。</p>
+				</article>
+				<article class="feature-card">
+					<span class="tag">命令行使用</span>
+					<strong>适合快速查看结果和做日常检查</strong>
+					<p>如果你更习惯终端，也可以直接用 <code>npm run cli -- --view today</code> 或 <code>npm run cli -- --mark avoid</code> 快速筛选和查看。</p>
 				</article>
 				<article class="feature-card">
 					<span class="tag">隐私与安全</span>
 					<strong>你的软件列表默认只留在本地</strong>
-					<p>公开页面只展示产品说明和截图，不展示你的真实软件数据。扫描、判断和标记都优先在本地完成。</p>
+					<p>这个公开页面只展示说明和示意截图，不读取你的真实软件数据。扫描、判断、标记和升级策略都优先在本地完成。</p>
 				</article>
 			</div>
 		</section>
