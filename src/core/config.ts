@@ -2,10 +2,11 @@ import { access, readFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import { resolve } from "node:path";
 
+import { initializeConfigFile } from "./auto-config.ts";
 import type { MonitorConfig, MonitorAppConfig } from "./types.ts";
 import { expandHomeDirectory } from "./utils.ts";
 
-const DEFAULT_CONFIG: MonitorConfig = {
+export const DEFAULT_CONFIG: MonitorConfig = {
 	port: 4123,
 	pollIntervalMs: 30 * 60 * 1000,
 	appLocations: ["/Applications", "~/Applications"],
@@ -18,10 +19,7 @@ export async function loadConfig(rootDirectory: string): Promise<MonitorConfig> 
 	try {
 		await access(configPath, constants.F_OK);
 	} catch {
-		return {
-			...DEFAULT_CONFIG,
-			appLocations: DEFAULT_CONFIG.appLocations.map(expandHomeDirectory),
-		};
+		return await initializeConfigFile(rootDirectory, DEFAULT_CONFIG);
 	}
 
 	const raw = await readFile(configPath, "utf8");
