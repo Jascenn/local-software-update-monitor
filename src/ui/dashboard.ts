@@ -111,6 +111,7 @@ export function renderDashboard(
 			text-align: left;
 			cursor: pointer;
 			background: var(--card);
+			color: var(--text);
 		}
 
 		.summary-card:hover {
@@ -121,6 +122,13 @@ export function renderDashboard(
 		.summary-card.active {
 			border-color: var(--accent);
 			background: #f4f5f5;
+		}
+
+		.summary-card strong {
+			color: var(--text);
+			font-family: var(--font-ui);
+			font-weight: 700;
+			letter-spacing: -0.02em;
 		}
 
 		.controls {
@@ -497,6 +505,14 @@ export function renderDashboard(
 			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 			gap: 12px;
+		}
+
+		.policy-toolbar {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 12px;
+			margin-bottom: 10px;
 		}
 
 		.policy-card {
@@ -1055,6 +1071,10 @@ export function renderDashboard(
 		let visibleFocusPolicies = [];
 		let activeAnnotationTarget = null;
 		let selectedTargets = {};
+		let selectionAnchors = {
+			status: null,
+			policy: null
+		};
 		let pendingUpgradeIds = {};
 		let activeSummaryShortcut = "";
 
@@ -1877,7 +1897,7 @@ export function renderDashboard(
 
 			contentNode.innerHTML = '<div class="table-shell"><table>'
 				+ '<thead><tr>'
-				+ '<th>选择</th>'
+				+ '<th><input class="select-toggle" type="checkbox" data-toggle-all-statuses="true"' + (allVisibleStatusesSelected() ? ' checked' : '') + ' /></th>'
 				+ renderHeaderGroup("应用", [{ key: "name", label: "按名称" }])
 				+ renderHeaderGroup("版本", [{ key: "installedVersion", label: "当前" }, { key: "latestVersion", label: "最新" }])
 				+ renderHeaderGroup("信号", [{ key: "status", label: "状态" }, { key: "policy", label: "策略" }])
@@ -1930,7 +1950,7 @@ export function renderDashboard(
 				+ '</article>';
 			}).join("");
 
-			node.innerHTML = '<div class="policy-grid">' + rows + '</div>';
+			node.innerHTML = '<div class="policy-toolbar"><label class="muted"><input class="select-toggle" type="checkbox" data-toggle-all-policies="true"' + (allVisiblePoliciesSelected() ? ' checked' : '') + ' /> 全选当前第三方</label></div><div class="policy-grid">' + rows + '</div>';
 		}
 
 		function renderSortButton(sortKey, label) {
@@ -2249,6 +2269,78 @@ export function renderDashboard(
 
 		function clearSelectedTargets() {
 			selectedTargets = {};
+			selectionAnchors.status = null;
+			selectionAnchors.policy = null;
+			renderSnapshot();
+		}
+
+		function applyStatusSelection(index, checked, withRange) {
+			if (withRange && selectionAnchors.status !== null) {
+				const start = Math.min(selectionAnchors.status, index);
+				const end = Math.max(selectionAnchors.status, index);
+				for (let current = start; current <= end; current += 1) {
+					const item = visibleStatuses[current];
+					if (!item) {
+						continue;
+					}
+					setSelectedTarget(buildStatusTarget(item), checked);
+				}
+			} else {
+				const item = visibleStatuses[index];
+				if (!item) {
+					return;
+				}
+				setSelectedTarget(buildStatusTarget(item), checked);
+			}
+
+			selectionAnchors.status = index;
+			renderSnapshot();
+		}
+
+		function applyPolicySelection(index, checked, withRange) {
+			if (withRange && selectionAnchors.policy !== null) {
+				const start = Math.min(selectionAnchors.policy, index);
+				const end = Math.max(selectionAnchors.policy, index);
+				for (let current = start; current <= end; current += 1) {
+					const item = visiblePolicies[current];
+					if (!item) {
+						continue;
+					}
+					setSelectedTarget(buildPolicyTarget(item), checked);
+				}
+			} else {
+				const item = visiblePolicies[index];
+				if (!item) {
+					return;
+				}
+				setSelectedTarget(buildPolicyTarget(item), checked);
+			}
+
+			selectionAnchors.policy = index;
+			renderSnapshot();
+		}
+
+		function allVisibleStatusesSelected() {
+			return visibleStatuses.length > 0 && visibleStatuses.every((item) => isSelectedTarget(buildStatusTarget(item)));
+		}
+
+		function allVisiblePoliciesSelected() {
+			return visiblePolicies.length > 0 && visiblePolicies.every((item) => isSelectedTarget(buildPolicyTarget(item)));
+		}
+
+		function toggleAllVisibleStatuses(selected) {
+			for (const item of visibleStatuses) {
+				setSelectedTarget(buildStatusTarget(item), selected);
+			}
+			selectionAnchors.status = null;
+			renderSnapshot();
+		}
+
+		function toggleAllVisiblePolicies(selected) {
+			for (const item of visiblePolicies) {
+				setSelectedTarget(buildPolicyTarget(item), selected);
+			}
+			selectionAnchors.policy = null;
 			renderSnapshot();
 		}
 
@@ -2377,6 +2469,21 @@ export function renderDashboard(
 				renderAndClearSummaryShortcut();
 			});
 			document.getElementById("content").addEventListener("click", (event) => {
+				const toggleAllStatuses = event.target.closest("[data-toggle-all-statuses]");
+				if (toggleAllStatuses) {
+					toggleAllVisibleStatuses(toggleAllStatuses.checked);
+					return;
+				}
+
+				const toggle = event.target.closest("[data-select-status-index]");
+				if (toggle) {
+					const index = Number(toggle.getAttribute("data-select-status-index"));
+					if (Number.isFinite(index)) {
+						applyStatusSelection(index, toggle.checked, Boolean(event.shiftKey));
+					}
+					return;
+				}
+
 				const upgradeButton = event.target.closest("[data-upgrade-id]");
 				if (upgradeButton) {
 					void runUpgradeForStatus(upgradeButton.getAttribute("data-upgrade-id"));
@@ -2405,20 +2512,6 @@ export function renderDashboard(
 					statusState.descending = false;
 				}
 				renderAndClearSummaryShortcut();
-			});
-			document.getElementById("content").addEventListener("change", (event) => {
-				const toggle = event.target.closest("[data-select-status-index]");
-				if (!toggle) {
-					return;
-				}
-
-				const item = visibleStatuses[Number(toggle.getAttribute("data-select-status-index"))];
-				if (!item) {
-					return;
-				}
-
-				setSelectedTarget(buildStatusTarget(item), toggle.checked);
-				renderSnapshot();
 			});
 
 			document.getElementById("policySearch").addEventListener("input", (event) => {
@@ -2451,6 +2544,21 @@ export function renderDashboard(
 				renderSnapshot();
 			});
 			document.getElementById("thirdPartySection").addEventListener("click", (event) => {
+				const toggleAllPolicies = event.target.closest("[data-toggle-all-policies]");
+				if (toggleAllPolicies) {
+					toggleAllVisiblePolicies(toggleAllPolicies.checked);
+					return;
+				}
+
+				const toggle = event.target.closest("[data-select-policy-index]");
+				if (toggle) {
+					const index = Number(toggle.getAttribute("data-select-policy-index"));
+					if (Number.isFinite(index)) {
+						applyPolicySelection(index, toggle.checked, Boolean(event.shiftKey));
+					}
+					return;
+				}
+
 				const annotateButton = event.target.closest("[data-policy-annotate-index]");
 				if (!annotateButton) {
 					return;
@@ -2459,20 +2567,6 @@ export function renderDashboard(
 				if (item) {
 					openAnnotationDialog(buildPolicyTarget(item));
 				}
-			});
-			document.getElementById("thirdPartySection").addEventListener("change", (event) => {
-				const toggle = event.target.closest("[data-select-policy-index]");
-				if (!toggle) {
-					return;
-				}
-
-				const item = visiblePolicies[Number(toggle.getAttribute("data-select-policy-index"))];
-				if (!item) {
-					return;
-				}
-
-				setSelectedTarget(buildPolicyTarget(item), toggle.checked);
-				renderSnapshot();
 			});
 
 			document.getElementById("annotationSaveButton").addEventListener("click", saveAnnotation);
