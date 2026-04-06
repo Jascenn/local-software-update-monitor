@@ -1,0 +1,5 @@
+dist
+node_modules
+backups
+data/*.json
+monitor.config.json

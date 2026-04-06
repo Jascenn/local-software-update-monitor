@@ -1,0 +1,81 @@
+{
+	"port": 4123,
+	"pollIntervalMs": 1800000,
+	"appLocations": [
+		"/Applications",
+		"~/Applications"
+	],
+	"trackedApps": [
+		{
+			"id": "raycast-github",
+			"displayName": "Raycast (GitHub Release)",
+			"installed": {
+				"kind": "appBundle",
+				"bundleId": "com.raycast.macos"
+			},
+			"source": {
+				"kind": "githubRelease",
+				"repo": "raycastapp/raycast",
+				"versionPrefix": ""
+			}
+		},
+		{
+			"id": "iina-github",
+			"displayName": "IINA (GitHub Release)",
+			"installed": {
+				"kind": "appBundle",
+				"bundleId": "com.colliderli.iina"
+			},
+			"source": {
+				"kind": "githubRelease",
+				"repo": "iina/iina",
+				"versionPrefix": "v"
+			}
+		},
+		{
+			"id": "stats-appcast",
+			"displayName": "Stats (Official Appcast)",
+			"installed": {
+				"kind": "appBundle",
+				"bundleId": "eu.exelban.Stats"
+			},
+			"source": {
+				"kind": "sparkleAppcast",
+				"url": "https://github.com/exelban/stats/releases/download/latest/appcast.xml"
+			}
+		},
+		{
+			"id": "some-json-endpoint",
+			"displayName": "Some App (JSON Endpoint)",
+			"installed": {
+				"kind": "manual",
+				"currentVersion": "1.0.0"
+			},
+			"source": {
+				"kind": "jsonEndpoint",
+				"url": "https://example.com/releases/latest.json",
+				"versionPath": "version"
+			}
+		},
+		{
+			"id": "some-html-page",
+			"displayName": "Some App (HTML Regex)",
+			"installed": {
+				"kind": "manual",
+				"currentVersion": "1.0.0"
+			},
+			"source": {
+				"kind": "htmlRegex",
+				"url": "https://example.com/downloads",
+				"pattern": "Latest Version:\\s*([0-9.]+)",
+				"matchGroup": 1,
+				"flags": "i"
+			},
+			"maintenance": {
+				"activationSource": "thirdPartyActivated",
+				"upgradePolicy": "hold",
+				"reason": "Downloaded from a non-official third-party source."
+			}
+		}
+	]
+}

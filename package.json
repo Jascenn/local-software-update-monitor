@@ -1,0 +1,26 @@
+{
+	"name": "local-software-update-monitor",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"description": "Monitor installed macOS software versions across brew, Mac App Store, GitHub, official sites, and third-party channels.",
+	"engines": {
+		"node": ">=22.0.0"
+	},
+	"scripts": {
+		"dev": "node --experimental-strip-types src/index.ts",
+		"audit:sources": "node --experimental-strip-types src/audit-sources.ts",
+		"audit:sources:save": "node --experimental-strip-types src/audit-sources.ts --save",
+		"audit:artifacts": "node --experimental-strip-types src/generate-audit-artifacts.ts",
+		"generate:candidates": "node --experimental-strip-types src/generate-tracked-candidates.ts",
+		"cli": "node --experimental-strip-types src/cli.ts",
+		"build": "tsc -p tsconfig.json",
+		"check": "tsc -p tsconfig.json --noEmit",
+		"start": "node dist/index.js",
+		"check-once": "node --experimental-strip-types src/index.ts --check-once"
+	},
+	"devDependencies": {
+		"@types/node": "^22.15.18",
+		"typescript": "^5.8.3"
+	}
+}
