@@ -1,40 +1,41 @@
 <!doctype html>
-<html lang="zh-CN" style="scroll-behavior:smooth">
+<html lang="zh-CN">
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<meta name="description" content="Lingyi App Watch 帮你统一查看 Mac 软件更新、来源可信度和升级建议，让更新这件事更稳一点。" />
+	<meta name="description" content="Lingyi App Watch 帮你整理 Mac 软件更新、来源和升级风险，先看清，再决定要不要升。" />
 	<title>Lingyi App Watch</title>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css" />
 	<style>
 		:root {
-			--bg: #ffffff;
+			--bg: #faf8f3;
 			--surface: #ffffff;
-			--surface-soft: #fafafa;
-			--text: #171717;
-			--muted: #6b7280;
-			--line: #e5e7eb;
-			--line-strong: #d1d5db;
-			--accent: #2563eb;
-			--accent-soft: #eff6ff;
-			--shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
-			--radius: 18px;
-			--max: 1100px;
-			--sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", sans-serif;
-			--serif: "Georgia", "Times New Roman", serif;
-			--wenkai: "LXGW WenKai", "霞鹜文楷", "PingFang SC", serif;
+			--text: #171411;
+			--muted: #6e655c;
+			--line: rgba(23, 20, 17, 0.1);
+			--line-strong: rgba(23, 20, 17, 0.18);
+			--accent: #171411;
+			--accent-soft: #f1ede6;
+			--max: 920px;
+			--sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+			--mono: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
 		}
 
 		* {
 			box-sizing: border-box;
 		}
 
+		html,
 		body {
 			margin: 0;
-			font-family: var(--sans);
+			padding: 0;
 			background: var(--bg);
 			color: var(--text);
+			font-family: var(--sans);
 			-webkit-font-smoothing: antialiased;
+		}
+
+		body {
+			line-height: 1.65;
 		}
 
 		a {
@@ -42,312 +43,249 @@
 			text-decoration: none;
 		}
 
-		.top-progress {
-			position: fixed;
-			inset: 0 0 auto;
-			height: 1px;
-			background: linear-gradient(90deg, rgba(37, 99, 235, 0.08), rgba(17, 24, 39, 0.3), rgba(37, 99, 235, 0.08));
-			z-index: 20;
+		img {
+			display: block;
+			max-width: 100%;
 		}
 
-		nav {
-			position: sticky;
-			top: 0;
-			z-index: 10;
-			border-bottom: 1px solid var(--line);
-			background: rgba(255, 255, 255, 0.94);
-			backdrop-filter: blur(10px);
+		code {
+			font-family: var(--mono);
 		}
 
-		.nav-inner,
+		nav,
 		main,
 		footer {
 			max-width: var(--max);
 			margin: 0 auto;
-			padding-left: 20px;
-			padding-right: 20px;
+			padding-left: 24px;
+			padding-right: 24px;
 		}
 
-		.nav-inner {
+		nav {
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
 			gap: 16px;
-			min-height: 68px;
+			padding-top: 20px;
+			padding-bottom: 20px;
 		}
 
 		.brand {
-			font-family: var(--serif);
-			font-style: italic;
-			font-variant: small-caps;
+			font-size: 0.95rem;
+			font-weight: 700;
 			letter-spacing: 0.08em;
-			font-size: 1.15rem;
-			color: #374151;
+			text-transform: uppercase;
 		}
 
 		.nav-links {
 			display: flex;
 			align-items: center;
-			gap: 20px;
-			color: var(--muted);
+			gap: 16px;
 			font-size: 0.92rem;
-		}
-
-		.nav-links a:hover {
-			color: var(--text);
-		}
-
-		main {
-			padding-top: 26px;
-			padding-bottom: 84px;
-		}
-
-		.notice {
-			border: 1px solid var(--line);
-			background: var(--surface-soft);
 			color: var(--muted);
-			border-radius: 14px;
-			padding: 12px 14px;
-			font-size: 0.9rem;
-			line-height: 1.7;
-		}
-
-		code {
-			padding: 0.1em 0.38em;
-			border-radius: 0.45em;
-			background: #f3f4f6;
-			font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
-			font-size: 0.88em;
-			color: #374151;
-		}
-
-		.code-block {
-			margin-top: 12px;
-			padding: 12px 14px;
-			border: 1px solid var(--line);
-			border-radius: 14px;
-			background: #fcfcfc;
-			font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
-			font-size: 0.84rem;
-			line-height: 1.8;
-			color: #374151;
-			white-space: pre-wrap;
-			word-break: break-word;
 		}
 
 		.hero {
-			padding: 28px 0 22px;
+			padding-top: 44px;
+			padding-bottom: 56px;
+			text-align: center;
+			border-top: 1px solid var(--line);
 			border-bottom: 1px solid var(--line);
 		}
 
-		.kicker {
-			display: inline-flex;
-			align-items: center;
-			gap: 8px;
-			padding: 6px 10px;
+		.badge {
+			display: inline-block;
+			padding: 6px 12px;
 			border-radius: 999px;
 			background: var(--accent-soft);
-			color: var(--accent);
-			font-size: 0.82rem;
-			font-weight: 500;
+			color: var(--muted);
+			font-size: 0.8rem;
+			font-weight: 600;
 		}
 
 		h1,
 		h2,
-		h3 {
+		h3,
+		p {
 			margin: 0;
-			letter-spacing: -0.03em;
 		}
 
 		h1 {
 			margin-top: 18px;
-			font-size: clamp(2.3rem, 5vw, 4.2rem);
-			line-height: 1.06;
-			font-weight: 650;
-			max-width: 12ch;
+			font-size: clamp(2.4rem, 5vw, 4.4rem);
+			line-height: 1.05;
+			letter-spacing: -0.04em;
 		}
 
-		.hero-copy {
-			margin-top: 16px;
-			max-width: 60ch;
-			font-family: var(--wenkai);
-			font-size: 1.02rem;
-			line-height: 1.95;
-			color: #4b5563;
+		.hero p {
+			max-width: 620px;
+			margin: 16px auto 0;
+			font-size: 1.04rem;
+			color: var(--muted);
 		}
 
 		.actions {
 			display: flex;
 			flex-wrap: wrap;
+			justify-content: center;
 			gap: 10px;
-			margin-top: 22px;
+			margin-top: 28px;
 		}
 
 		.button {
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
-			height: 42px;
+			min-height: 42px;
 			padding: 0 16px;
-			border-radius: 12px;
 			border: 1px solid var(--line);
+			border-radius: 10px;
 			background: var(--surface);
-			font-size: 0.94rem;
-			transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
-		}
-
-		.button:hover {
-			background: #f8fafc;
-			border-color: var(--line-strong);
-			transform: translateY(-1px);
+			font-size: 0.92rem;
 		}
 
 		.button.primary {
-			background: #111827;
-			border-color: #111827;
-			color: #ffffff;
+			background: var(--accent);
+			border-color: var(--accent);
+			color: #fff;
 		}
 
-		.button.primary:hover {
-			background: #1f2937;
-			border-color: #1f2937;
+		.section {
+			padding-top: 56px;
 		}
 
-		.meta-grid,
-		.feature-grid,
-		.link-grid {
+		.section-title {
+			margin-bottom: 24px;
+			font-size: 0.82rem;
+			font-weight: 700;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			color: var(--muted);
+		}
+
+		.feature-grid {
 			display: grid;
-			gap: 14px;
-		}
-
-		.meta-grid {
 			grid-template-columns: repeat(3, minmax(0, 1fr));
-			margin-top: 24px;
+			gap: 16px;
 		}
 
-		.meta-card,
-		.feature-card,
-		.capture-card,
-		.link-card {
+		.card {
+			padding: 24px;
 			border: 1px solid var(--line);
-			border-radius: var(--radius);
+			border-radius: 18px;
 			background: var(--surface);
-			box-shadow: var(--shadow);
 		}
 
-		.meta-card,
-		.feature-card,
-		.link-card {
-			padding: 18px;
+		.card h3 {
+			margin-bottom: 8px;
+			font-size: 1.04rem;
 		}
 
-		.meta-card strong,
-		.feature-card strong,
-		.link-card strong {
+		.card p,
+		.step p,
+		.faq-item p,
+		.preview-copy p {
+			font-size: 0.95rem;
+			color: var(--muted);
+		}
+
+		.preview {
+			overflow: hidden;
+			border: 1px solid var(--line);
+			border-radius: 22px;
+			background: var(--surface);
+		}
+
+		.preview-copy {
+			padding: 22px 24px;
+			border-bottom: 1px solid var(--line);
+		}
+
+		.preview-copy h2 {
+			margin-bottom: 8px;
+			font-size: 1.4rem;
+		}
+
+		.preview-copy small {
 			display: block;
+			margin-top: 8px;
+			font-size: 0.84rem;
+			color: var(--muted);
+		}
+
+		.steps {
+			display: grid;
+			gap: 16px;
+		}
+
+		.step {
+			display: grid;
+			grid-template-columns: 36px 1fr;
+			gap: 16px;
+			padding: 20px 0;
+			border-bottom: 1px solid var(--line);
+		}
+
+		.step:last-child {
+			border-bottom: 0;
+		}
+
+		.step-num {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 36px;
+			height: 36px;
+			border-radius: 999px;
+			background: var(--accent);
+			color: #fff;
+			font-size: 0.86rem;
+			font-weight: 700;
+		}
+
+		.step h3 {
+			margin-bottom: 6px;
+			font-size: 1.02rem;
+		}
+
+		.code {
+			margin-top: 10px;
+			padding: 12px 14px;
+			border-radius: 12px;
+			background: #f3efe8;
+			font-family: var(--mono);
+			font-size: 0.84rem;
+			line-height: 1.7;
+			white-space: pre-wrap;
+			word-break: break-word;
+		}
+
+		.faq-list {
+			display: grid;
+			gap: 12px;
+		}
+
+		.faq-item {
+			padding: 20px 22px;
+			border: 1px solid var(--line);
+			border-radius: 16px;
+			background: var(--surface);
+		}
+
+		.faq-item h3 {
 			margin-bottom: 8px;
 			font-size: 1rem;
 		}
 
-		.meta-card p,
-		.feature-card p,
-		.link-card p {
-			margin: 0;
-			color: var(--muted);
-			line-height: 1.78;
-			font-size: 0.94rem;
-		}
-
-		.section {
-			padding-top: 28px;
-		}
-
-		.section-head {
-			display: flex;
-			align-items: end;
-			justify-content: space-between;
-			gap: 16px;
-			padding-bottom: 12px;
-			border-bottom: 1px solid var(--line);
-			margin-bottom: 18px;
-		}
-
-		.section-head h2 {
-			font-size: 1.65rem;
-			font-weight: 620;
-		}
-
-		.section-head p {
-			margin: 0;
-			color: var(--muted);
-			font-size: 0.94rem;
-			line-height: 1.7;
-			max-width: 60ch;
-		}
-
-		.feature-grid {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
-		}
-
-		.feature-card .tag {
-			display: inline-block;
-			margin-bottom: 10px;
-			padding: 5px 9px;
-			border-radius: 999px;
-			background: #f3f4f6;
-			color: #6b7280;
-			font-size: 0.78rem;
-		}
-
-		.capture-card {
-			overflow: hidden;
-		}
-
-		.capture-head {
-			padding: 16px 18px;
-			border-bottom: 1px solid var(--line);
-			background: #fcfcfc;
-		}
-
-		.capture-head strong {
-			display: block;
-			font-size: 1rem;
-			margin-bottom: 4px;
-		}
-
-		.capture-head p {
-			margin: 0;
-			font-size: 0.92rem;
-			color: var(--muted);
-			line-height: 1.7;
-		}
-
-		.capture-card img {
-			display: block;
-			width: 100%;
-			height: auto;
-		}
-
-		.link-grid {
-			grid-template-columns: 1.1fr 0.9fr;
-		}
-
 		footer {
-			padding-top: 18px;
-			padding-bottom: 36px;
-			border-top: 1px solid var(--line);
 			display: flex;
-			justify-content: space-between;
 			align-items: flex-start;
-			gap: 16px;
-			color: var(--muted);
+			justify-content: space-between;
+			gap: 20px;
+			padding-top: 56px;
+			padding-bottom: 40px;
 			font-size: 0.9rem;
-		}
-
-		.footer-meta {
-			display: flex;
-			flex-direction: column;
-			gap: 6px;
+			color: var(--muted);
 		}
 
 		.footer-links {
@@ -356,228 +294,152 @@
 			gap: 10px 14px;
 		}
 
-		footer a {
-			color: #4b5563;
-		}
-
-		footer a:hover {
-			color: var(--text);
-		}
-
-		@media (max-width: 900px) {
-			.meta-grid,
-			.feature-grid,
-			.link-grid {
-				grid-template-columns: 1fr;
+		@media (max-width: 760px) {
+			nav,
+			main,
+			footer {
+				padding-left: 16px;
+				padding-right: 16px;
 			}
 
-			.section-head {
+			nav,
+			footer {
 				display: block;
 			}
 
-			.section-head p {
+			.nav-links,
+			.footer-links {
 				margin-top: 10px;
 			}
-		}
 
-		@media (max-width: 640px) {
-			.nav-inner,
-			main,
-			footer {
-				padding-left: 14px;
-				padding-right: 14px;
+			.feature-grid {
+				grid-template-columns: 1fr;
 			}
 
-			.nav-inner {
-				min-height: 58px;
-			}
-
-			.nav-links {
-				gap: 12px;
-				font-size: 0.86rem;
+			.hero {
+				padding-top: 34px;
+				padding-bottom: 44px;
 			}
 
 			h1 {
-				font-size: 2rem;
-			}
-
-			.hero-copy {
-				font-size: 0.98rem;
-			}
-
-			footer {
-				flex-direction: column;
+				font-size: 2.4rem;
 			}
 		}
 	</style>
 </head>
 <body>
-	<div class="top-progress"></div>
 	<nav>
-		<div class="nav-inner">
-			<a class="brand" href="/">LingYi</a>
-			<div class="nav-links">
-				<a href="#overview">产品亮点</a>
-				<a href="#guide">使用方式</a>
-				<a href="#snapshot">界面预览</a>
-				<a href="https://github.com/Jascenn/local-software-update-monitor/releases/tag/v0.3.0" target="_blank" rel="noreferrer">下载</a>
-				<a href="https://github.com/Jascenn/local-software-update-monitor" target="_blank" rel="noreferrer">GitHub</a>
-			</div>
+		<a class="brand" href="/">Lingyi</a>
+		<div class="nav-links">
+			<a href="#features">功能</a>
+			<a href="#preview">界面</a>
+			<a href="#start">开始使用</a>
+			<a href="https://github.com/Jascenn/local-software-update-monitor/releases/tag/v0.3.0" target="_blank" rel="noreferrer">下载</a>
 		</div>
 	</nav>
 
 	<main>
-		<section class="hero" id="overview">
-			<div class="kicker">macOS 软件更新助手 · 本地运行 · v0.3.0</div>
-			<h1>帮你把 Mac 上的软件更新，整理成一张真正能做决定的清单。</h1>
-			<p class="hero-copy">很多人的软件来自 App Store、官网、GitHub、brew，甚至历史安装包。Lingyi App Watch 会把这些更新入口收拢到一起，再告诉你哪些可以放心更新，哪些应该先看看来源、授权状态和兼容性。它不是只提醒“有新版本”，而是帮你判断“现在要不要升”。</p>
+		<section class="hero">
+			<div class="badge">macOS 软件更新助手 · 本地运行 · v0.3.0</div>
+			<h1>先看清，再决定升不升级。</h1>
+			<p>把分散的软件更新、来源和风险收成一张清单。你看到的不只是新版本，还有它值不值得现在动。</p>
 			<div class="actions">
-				<a class="button primary" href="https://github.com/Jascenn/local-software-update-monitor/releases/tag/v0.3.0" target="_blank" rel="noreferrer">下载当前版本</a>
-				<a class="button" href="#guide">3 分钟看懂怎么用</a>
-				<a class="button" href="https://github.com/Jascenn/local-software-update-monitor" target="_blank" rel="noreferrer">查看源码与更新记录</a>
+				<a class="button primary" href="#preview">看界面</a>
+				<a class="button" href="#start">怎么开始</a>
+				<a class="button" href="https://github.com/Jascenn/local-software-update-monitor" target="_blank" rel="noreferrer">GitHub</a>
 			</div>
-			<div class="meta-grid">
-				<div class="meta-card">
-					<strong>把更新入口收拢到一起</strong>
-					<p>你不用再分别去看 App Store、brew、GitHub 和官网。常见来源可以放进同一个面板统一查看。</p>
+		</section>
+
+		<section class="section" id="features">
+			<div class="section-title">为什么用它</div>
+			<div class="feature-grid">
+				<div class="card">
+					<h3>更新来源不再分散</h3>
+					<p>把 brew、App Store、GitHub、官网和手工配置放到一个地方看。</p>
 				</div>
-				<div class="meta-card">
-					<strong>把风险提示提前</strong>
-					<p>对于来源不明、需要谨慎处理或你自己不想马上更新的软件，它会优先提醒，而不是淹没在普通更新里。</p>
+				<div class="card">
+					<h3>不是只提醒有更新</h3>
+					<p>它会把第三方来源、谨慎升级和暂缓升级单独拎出来。</p>
 				</div>
-				<div class="meta-card">
-					<strong>把你的经验也记住</strong>
-					<p>你可以直接给软件打标记，例如重点关注、不要升级、待核验。下次再看时，系统会把这些判断一起带上。</p>
+				<div class="card">
+					<h3>你的判断会留下来</h3>
+					<p>“不要升级”“待核验”“重点关注”这类标记会继续参与排序和筛选。</p>
 				</div>
 			</div>
 		</section>
 
-		<section class="section">
-			<div class="section-head">
-				<div>
-					<h2>它更适合什么人</h2>
-					<p>如果你的软件来源比较杂，或者你很在意授权状态、兼容性和更新风险，这类场景会更明显地感受到它的价值。</p>
+		<section class="section" id="preview">
+			<div class="section-title">界面</div>
+			<div class="preview">
+				<div class="preview-copy">
+					<h2>像一张会自己整理的软件清单</h2>
+					<p>先看今天该处理什么，再看哪些软件暂时不要碰。</p>
+					<small>公开页使用的是脱敏预览图，只保留布局和信息层级。</small>
 				</div>
-			</div>
-			<div class="feature-grid">
-				<article class="feature-card">
-					<span class="tag">多来源安装</span>
-					<strong>经常混用官网版、App Store 版和 brew 版</strong>
-					<p>你会知道哪些软件已经有更新，哪些更新来自什么渠道，不用在多个地方来回切换。</p>
-				</article>
-				<article class="feature-card">
-					<span class="tag">谨慎升级</span>
-					<strong>不想每次看到更新就立刻升</strong>
-					<p>有些软件升级后可能影响授权、插件、配置或工作流。你可以把它们单独压到风险区，先评估再处理。</p>
-				</article>
-				<article class="feature-card">
-					<span class="tag">长期维护</span>
-					<strong>需要一份能持续维护的软件清单</strong>
-					<p>它支持筛选、排序、批量标记和命令行查看，适合把“软件更新管理”变成一件持续可维护的事。</p>
-				</article>
+				<img src="./assets/dashboard-v0.3.0-public.png" alt="Lingyi App Watch dashboard preview with redacted details" />
 			</div>
 		</section>
 
-		<section class="section" id="guide">
-			<div class="section-head">
-				<div>
-					<h2>怎么使用</h2>
-					<p>第一次使用时，先把面板跑起来，再逐步补齐你关心的软件来源。下面这 4 步就是最短上手路径。</p>
-				</div>
-			</div>
-			<div class="feature-grid">
-				<article class="feature-card">
-					<span class="tag">第 1 步</span>
-					<strong>下载项目并安装依赖</strong>
-					<p>当前版本适合直接在自己的 Mac 上运行。先拉取项目，再安装依赖。</p>
-					<div class="code-block">git clone https://github.com/Jascenn/local-software-update-monitor.git
+		<section class="section" id="start">
+			<div class="section-title">开始使用</div>
+			<div class="steps">
+				<div class="step">
+					<div class="step-num">1</div>
+					<div>
+						<h3>下载项目</h3>
+						<p>先把项目拉到本地并安装依赖。</p>
+						<div class="code">git clone https://github.com/Jascenn/local-software-update-monitor.git
 cd local-software-update-monitor
 npm install</div>
-				</article>
-				<article class="feature-card">
-					<span class="tag">第 2 步</span>
-					<strong>复制配置并启动本地面板</strong>
-					<p>复制示例配置后直接启动服务，浏览器打开本地地址就能看到第一版软件清单。</p>
-					<div class="code-block">cp monitor.config.example.json monitor.config.json
-npm run dev
-
-打开 http://127.0.0.1:4123</div>
-				</article>
-				<article class="feature-card">
-					<span class="tag">第 3 步</span>
-					<strong>补齐你关心的软件来源</strong>
-					<p>系统会先自动识别一部分本机软件。接下来把官网更新页、GitHub Release、JSON 接口或其他稳定来源补进 <code>monitor.config.json</code>，结果会更完整。</p>
-				</article>
-				<article class="feature-card">
-					<span class="tag">第 4 步</span>
-					<strong>每天先看“今天处理”和“风险区”</strong>
-					<p>日常使用时，优先看今天要处理的更新，再看谨慎升级和第三方来源的软件。对敏感软件可以直接打标记，例如“不要升级”“重点关注”“待核验”。</p>
-				</article>
-				<article class="feature-card">
-					<span class="tag">网页使用</span>
-					<strong>适合做筛选、排序和批量处理</strong>
-					<p>你可以在网页里按状态、来源和策略筛选，也可以多选后批量标记。能一键升级的软件会直接给出操作入口。</p>
-				</article>
-				<article class="feature-card">
-					<span class="tag">命令行使用</span>
-					<strong>适合快速查看结果和做日常检查</strong>
-					<p>如果你更习惯终端，也可以直接用 <code>npm run cli -- --view today</code> 或 <code>npm run cli -- --mark avoid</code> 快速筛选和查看。</p>
-				</article>
-				<article class="feature-card">
-					<span class="tag">隐私与安全</span>
-					<strong>你的软件列表默认只留在本地</strong>
-					<p>这个公开页面只展示说明和示意截图，不读取你的真实软件数据。扫描、判断、标记和升级策略都优先在本地完成。</p>
-				</article>
-			</div>
-		</section>
-
-		<section class="section" id="snapshot">
-			<div class="section-head">
-				<div>
-					<h2>界面会长什么样</h2>
-					<p>下面这张图展示的是当前版本的真实面板。你可以在一个页面里完成筛选、排序、打标记和处理更新。</p>
+					</div>
 				</div>
-			</div>
-			<div class="capture-card">
-				<div class="capture-head">
-					<strong>Lingyi App Watch Dashboard</strong>
-					<p>你会看到今天要处理的更新、谨慎项目、第三方来源提示，以及批量标记和排序能力。</p>
+				<div class="step">
+					<div class="step-num">2</div>
+					<div>
+						<h3>启动面板</h3>
+						<p>复制配置后直接启动本地服务。</p>
+						<div class="code">cp monitor.config.example.json monitor.config.json
+npm run dev</div>
+					</div>
 				</div>
-				<img src="./assets/dashboard-v0.3.0.png" alt="Lingyi App Watch dashboard screenshot" />
+				<div class="step">
+					<div class="step-num">3</div>
+					<div>
+						<h3>开始整理软件</h3>
+						<p>打开 <code>http://127.0.0.1:4123</code>，给敏感软件加标记，再按风险做决定。</p>
+					</div>
+				</div>
 			</div>
 		</section>
 
 		<section class="section">
-			<div class="section-head">
-				<div>
-					<h2>下载与更新</h2>
-					<p>当前版本通过 GitHub Release 提供。后续版本也会继续按版本记录更新，方便你查看变化后再决定是否升级。</p>
+			<div class="section-title">常见问题</div>
+			<div class="faq-list">
+				<div class="faq-item">
+					<h3>会上传我的软件列表吗？</h3>
+					<p>不会。扫描、标记和操作都优先在你自己的 Mac 上完成。</p>
 				</div>
-			</div>
-			<div class="link-grid">
-				<div class="link-card">
-					<strong>当前版本可以做什么</strong>
-					<p>`v0.3.0` 已包含多来源版本监控、风险优先排序、人工标记、批量处理，以及网页内的一键升级或手动处理提示。</p>
+				<div class="faq-item">
+					<h3>支持哪些来源？</h3>
+					<p>当前支持 Homebrew、Mac App Store，以及通过配置补充 GitHub Release、官网和其他版本页。</p>
 				</div>
-				<div class="link-card">
-					<strong>后续会怎么更新</strong>
-					<p>后续版本会继续通过 GitHub 迭代发布，这个说明页也会一起更新，保持产品介绍、截图和实际能力同步。</p>
+				<div class="faq-item">
+					<h3>适合什么人？</h3>
+					<p>适合软件来源很多、又不想每次看到更新就立刻升级的人。</p>
 				</div>
 			</div>
 		</section>
 	</main>
 
 	<footer>
-		<div class="footer-meta">
-			<span>Lingyi App Watch · 由 Jascenn 发起并维护</span>
-			<div class="footer-links">
-				<a href="https://lingyi.tools" target="_blank" rel="noreferrer">lingyi.tools</a>
-				<a href="https://lingyi.bio" target="_blank" rel="noreferrer">lingyi.bio</a>
-				<a href="https://github.com/Jascenn" target="_blank" rel="noreferrer">GitHub</a>
-			</div>
+		<div>
+			<strong>Lingyi App Watch</strong><br />
+			由 Jascenn 发起并维护
 		</div>
-		<div class="footer-meta">
-			<span>项目地址</span>
+		<div class="footer-links">
+			<a href="https://lingyi.tools" target="_blank" rel="noreferrer">lingyi.tools</a>
+			<a href="https://lingyi.bio" target="_blank" rel="noreferrer">lingyi.bio</a>
+			<a href="https://github.com/Jascenn" target="_blank" rel="noreferrer">GitHub</a>
 			<a href="https://watch.lingyi.tools" target="_blank" rel="noreferrer">watch.lingyi.tools</a>
 		</div>
 	</footer>
