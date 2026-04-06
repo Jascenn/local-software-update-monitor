@@ -6,7 +6,7 @@ export function renderDashboard(
 	thirdPartyPolicy: ThirdPartyPolicyEntry[],
 	annotations: AppAnnotation[],
 ): string {
-	const title = "Local Software Update Monitor";
+	const title = "Lingyi App Watch";
 	const serialized = JSON.stringify(snapshot).replace(/</g, "\\u003c");
 	const serializedPolicy = JSON.stringify(thirdPartyPolicy).replace(/</g, "\\u003c");
 	const serializedAnnotations = JSON.stringify(annotations).replace(/</g, "\\u003c");
@@ -16,6 +16,7 @@ export function renderDashboard(
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="description" content="本地优先的 macOS 软件更新与第三方来源风险看板。" />
 	<title>${title}</title>
 	<style>
 		:root {
@@ -813,7 +814,7 @@ export function renderDashboard(
 	<main>
 		<header>
 			<h1>${title}</h1>
-			<div class="subhead">自动监控 Homebrew 和 Mac App Store；通过配置补充 GitHub Release、官网 Appcast、JSON 接口和第三方下载页。</div>
+			<div class="subhead">本地优先的 macOS 软件更新与来源风险看板。自动监控 Homebrew 和 Mac App Store，并用 GitHub Release、官网 Appcast、JSON 接口和第三方下载页补齐版本来源。</div>
 			<div class="muted" id="meta"></div>
 		</header>
 		<section class="summary" id="summary"></section>

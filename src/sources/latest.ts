@@ -9,7 +9,7 @@ import type {
 import { nowIso, resolveJsonPath } from "../core/utils.ts";
 
 const DEFAULT_HEADERS = {
-	"User-Agent": "local-software-update-monitor",
+	"User-Agent": "lingyi-app-watch",
 	Accept: "application/json, text/plain, */*",
 };
 

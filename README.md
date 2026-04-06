@@ -1,6 +1,17 @@
-# Local Software Update Monitor
+# Lingyi App Watch
 
-一个面向 macOS 的本地版本监控服务，用来统一查看你机器上软件的当前版本和可更新版本。
+一个面向 macOS 的本地优先更新看板，用来统一查看机器上软件的当前版本、可更新版本，以及第三方来源带来的升级风险。
+
+![Lingyi App Watch dashboard](./docs/screenshots/dashboard-v0.3.0.png)
+
+## 发布定位
+
+- 对外产品名：`Lingyi App Watch`
+- 当前仓库名：`local-software-update-monitor`
+- 当前版本：`0.3.0`
+- 推荐发布方式：本地应用继续在本机运行；`lingyi.tools` / `lingyi.bio` 用来承载官网、下载页、截图和说明页
+
+这个项目的监控内核依赖本机 `brew`、`mas`、`/Applications` 和本地软件元数据，所以不适合直接部署到 Cloudflare Pages / Workers 里运行。Cloudflare 更适合承接官网、下载页、发布说明、截图页，以及受保护的远程入口。
 
 支持两类监控方式：
 
@@ -51,6 +62,15 @@ npm run dev
 ```text
 http://127.0.0.1:4123
 ```
+
+## 这次发布包含什么
+
+- 更像数据库的简洁看板视图，按“今天处理 / 风险区 / 全部资产”组织
+- 可点击的汇总卡片、主表排序、筛选和风险优先排序
+- 主表和第三方列表支持 `Shift` 连选、全选和批量标记
+- 第三方来源审计、人工记忆和升级策略叠加
+- 只能一键升级、需要手动处理、不能一键升级的区分
+- 发布截图、变更记录和上线方案文档
 
 ## 可用命令
 
