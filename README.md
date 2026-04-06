@@ -9,9 +9,18 @@
 - 对外产品名：`Lingyi App Watch`
 - 当前仓库名：`local-software-update-monitor`
 - 当前版本：`0.3.0`
-- 推荐发布方式：本地应用继续在本机运行；`lingyi.tools` / `lingyi.bio` 用来承载官网、下载页、截图和说明页
+- 推荐发布方式：本地应用继续在本机运行；仓库内的 `site/` 目录承载官网、下载页、截图和说明页，再由 `watch.lingyi.tools` 对外发布
 
 这个项目的监控内核依赖本机 `brew`、`mas`、`/Applications` 和本地软件元数据，所以不适合直接部署到 Cloudflare Pages / Workers 里运行。Cloudflare 更适合承接官网、下载页、发布说明、截图页，以及受保护的远程入口。
+
+## 仓库结构
+
+- `src/`: 本地监控服务、CLI、API 和网页看板
+- `site/`: 对外官网、产品说明、截图和入口页
+- `docs/screenshots/`: 仓库内发布截图
+- `reports/`: 发布、审计和产品文档
+
+当前 Cloudflare Pages 使用同一仓库，但只读取 `site/` 作为站点根目录。
 
 支持两类监控方式：
 
