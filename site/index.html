@@ -338,9 +338,30 @@
 			border-top: 1px solid var(--line);
 			display: flex;
 			justify-content: space-between;
+			align-items: flex-start;
 			gap: 16px;
 			color: var(--muted);
 			font-size: 0.9rem;
+		}
+
+		.footer-meta {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+		}
+
+		.footer-links {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 10px 14px;
+		}
+
+		footer a {
+			color: #4b5563;
+		}
+
+		footer a:hover {
+			color: var(--text);
 		}
 
 		@media (max-width: 900px) {
@@ -547,8 +568,18 @@ npm run dev
 	</main>
 
 	<footer>
-		<span>Lingyi App Watch · local-first macOS update control</span>
-		<span>watch.lingyi.tools</span>
+		<div class="footer-meta">
+			<span>Lingyi App Watch · 由 Jascenn 发起并维护</span>
+			<div class="footer-links">
+				<a href="https://lingyi.tools" target="_blank" rel="noreferrer">lingyi.tools</a>
+				<a href="https://lingyi.bio" target="_blank" rel="noreferrer">lingyi.bio</a>
+				<a href="https://github.com/Jascenn" target="_blank" rel="noreferrer">GitHub</a>
+			</div>
+		</div>
+		<div class="footer-meta">
+			<span>项目地址</span>
+			<a href="https://watch.lingyi.tools" target="_blank" rel="noreferrer">watch.lingyi.tools</a>
+		</div>
 	</footer>
 </body>
 </html>
