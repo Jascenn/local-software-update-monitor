@@ -99,6 +99,7 @@ export interface AppBundleRecord {
 	path: string;
 	bundleId: string | null;
 	version: string | null;
+	lastActivityAt: string | null;
 }
 
 export interface Inventory {
@@ -124,6 +125,7 @@ export interface AppStatus {
 	latestVersion: string | null;
 	status: StatusLevel;
 	lastCheckedAt: string;
+	lastActivityAt?: string | null;
 	path?: string;
 	bundleId?: string | null;
 	sourceUrl?: string;

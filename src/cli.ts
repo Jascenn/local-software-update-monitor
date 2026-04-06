@@ -18,6 +18,7 @@ import { loadAnnotations } from "./storage/annotations.ts";
 import { loadState, saveSnapshot } from "./storage/state.ts";
 
 type CommandName = "status" | "policy" | "candidates";
+type StatusViewMode = "today" | "risk" | "inventory";
 
 interface ParsedArgs {
 	command: CommandName;
@@ -51,7 +52,8 @@ async function main(): Promise<void> {
 async function runStatusCommand(rootDirectory: string, flags: Map<string, string | boolean>): Promise<void> {
 	const snapshot = await loadSnapshotForCli(rootDirectory, readBooleanFlag(flags, "live"));
 	const annotations = await loadAnnotations(rootDirectory);
-	const sort = (readStringFlag(flags, "sort") as StatusSortKey | undefined) ?? "priority";
+	const view = (readStringFlag(flags, "view") as StatusViewMode | undefined) ?? "inventory";
+	const sort = (readStringFlag(flags, "sort") as StatusSortKey | undefined) ?? defaultSortForView(view);
 	const descending = readBooleanFlag(flags, "desc");
 	const mark = readStringFlag(flags, "mark");
 	let statuses = applyStatusQuery(snapshot.statuses, {
@@ -65,11 +67,12 @@ async function runStatusCommand(rootDirectory: string, flags: Map<string, string
 		sort,
 		descending: sort === "priority" ? false : descending,
 	});
+	statuses = applyStatusView(statuses, annotations, view);
 	if (mark) {
 		statuses = statuses.filter((status) => matchesMarkFilter(annotationForStatus(status, annotations), mark));
 	}
-	if (sort === "priority") {
-		statuses = [...statuses].sort((left, right) => compareAnnotatedPriority(left, right, annotations) * (descending ? -1 : 1));
+	if (sort === "priority" || sort === "activity") {
+		statuses = [...statuses].sort((left, right) => compareStatusesForView(left, right, annotations, view, sort) * (descending ? -1 : 1));
 	}
 	const limit = readNumberFlag(flags, "limit");
 	if (typeof limit === "number") {
@@ -97,6 +100,7 @@ async function runStatusCommand(rootDirectory: string, flags: Map<string, string
 	}
 
 	console.log(`Snapshot: ${snapshot.generatedAt}`);
+	console.log(`View: ${view}`);
 	console.log(`Showing ${annotatedStatuses.length} of ${snapshot.statuses.length} statuses`);
 	console.log(
 		`Summary: updates=${snapshot.summary.updateAvailable} hold=${snapshot.summary.hold} cautious=${snapshot.summary.cautious} errors=${snapshot.summary.errors}`,
@@ -104,6 +108,7 @@ async function runStatusCommand(rootDirectory: string, flags: Map<string, string
 	console.log(
 		renderTable(annotatedStatuses, [
 			{ header: "NAME", width: 24, value: (item) => item.displayName },
+			{ header: "ACTIVITY", width: 14, value: (item) => activityLabel(item.lastActivityAt) },
 			{ header: "STATUS", width: 16, value: (item) => item.status },
 			{ header: "POLICY", width: 12, value: (item) => item.upgradePolicy },
 			{ header: "MARK", width: 12, value: (item) => markLabel(item.annotation?.mark) },
@@ -353,20 +358,23 @@ Commands:
 
 Status options:
   --live                  Run a fresh snapshot instead of cached latest.json
+  --view <mode>           today | risk | inventory
   --search <text>         Filter by name, note, path, or channel
   --status <level>        update-available | up-to-date | unknown | error
   --policy <level>        normal | cautious | hold
   --category <kind>       brew | mas | configured
   --source <kind>         official | appStore | brew | github | thirdPartyStore | thirdPartyActivated | manual
-  --mark <kind>           watch | avoid | safe | todo | ignore | unmarked
+  --mark <kind>           watch | avoid | safe | todo | ignore | annotated | unmarked
   --updates-only          Show only update-available rows
   --third-party-only      Show only third-party rows
-  --sort <key>            priority | name | status | policy | channel | installedVersion | latestVersion | checkedAt
+  --sort <key>            priority | activity | name | status | policy | channel | installedVersion | latestVersion | checkedAt
   --desc                  Sort descending
   --limit <n>             Limit rows
   --json                  Print JSON
 
 Examples:
+  npm run cli -- --view today --limit 12
+  npm run cli -- --view risk --mark annotated
   npm run cli -- --updates-only --policy hold
   npm run cli -- status --search CleanShot --third-party-only
   npm run cli -- policy --marker macked --limit 10
@@ -384,6 +392,10 @@ function annotationForStatus(status: AppStatus, annotations: AppAnnotation[]): A
 }
 
 function matchesMarkFilter(annotation: AppAnnotation | null, mark: string): boolean {
+	if (mark === "annotated") {
+		return annotation !== null;
+	}
+
 	if (mark === "unmarked") {
 		return annotation === null;
 	}
@@ -397,6 +409,99 @@ function compareAnnotatedPriority(left: AppStatus, right: AppStatus, annotations
 		priorityStatusRank(left) - priorityStatusRank(right) ||
 		left.displayName.localeCompare(right.displayName, "zh-CN", { sensitivity: "base" })
 	);
+}
+
+function applyStatusView(statuses: AppStatus[], annotations: AppAnnotation[], view: StatusViewMode): AppStatus[] {
+	switch (view) {
+		case "today":
+			return statuses.filter((status) => isTodayStatus(status, annotationForStatus(status, annotations)));
+		case "risk":
+			return statuses.filter((status) => isRiskStatus(status, annotationForStatus(status, annotations)));
+		case "inventory":
+		default:
+			return statuses;
+	}
+}
+
+function compareStatusesForView(
+	left: AppStatus,
+	right: AppStatus,
+	annotations: AppAnnotation[],
+	view: StatusViewMode,
+	sort: StatusSortKey,
+): number {
+	if (sort === "activity") {
+		return compareActivity(left, right) || compareAnnotatedPriority(left, right, annotations);
+	}
+
+	switch (view) {
+		case "today":
+			return compareActivity(left, right) || compareAnnotatedPriority(left, right, annotations);
+		case "risk":
+			return (
+				annotationPriority(annotationForStatus(left, annotations)) - annotationPriority(annotationForStatus(right, annotations)) ||
+				policyPriority(left.upgradePolicy) - policyPriority(right.upgradePolicy) ||
+				statusSeverity(left.status) - statusSeverity(right.status) ||
+				compareActivity(left, right) ||
+				left.displayName.localeCompare(right.displayName, "zh-CN", { sensitivity: "base" })
+			);
+		case "inventory":
+		default:
+			return compareAnnotatedPriority(left, right, annotations);
+	}
+}
+
+function defaultSortForView(view: StatusViewMode): StatusSortKey {
+	switch (view) {
+		case "today":
+		case "risk":
+			return "activity";
+		case "inventory":
+		default:
+			return "priority";
+	}
+}
+
+function isTodayStatus(status: AppStatus, annotation: AppAnnotation | null): boolean {
+	return status.status === "update-available"
+		|| status.status === "error"
+		|| isRiskStatus(status, annotation)
+		|| Boolean(annotation && annotation.mark !== "ignore");
+}
+
+function isRiskStatus(status: AppStatus, annotation: AppAnnotation | null): boolean {
+	return status.status === "error"
+		|| status.upgradePolicy !== "normal"
+		|| status.activationSource === "thirdPartyActivated"
+		|| annotation?.mark === "avoid"
+		|| annotation?.mark === "todo"
+		|| annotation?.mark === "watch";
+}
+
+function compareActivity(left: AppStatus, right: AppStatus): number {
+	return activityScore(right.lastActivityAt) - activityScore(left.lastActivityAt);
+}
+
+function activityScore(value: string | null | undefined): number {
+	if (!value) {
+		return 0;
+	}
+
+	const timestamp = new Date(value).getTime();
+	return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function activityLabel(value: string | null | undefined): string {
+	if (!value) {
+		return "-";
+	}
+
+	try {
+		const date = new Date(value);
+		return date.toISOString().slice(0, 10);
+	} catch {
+		return "-";
+	}
 }
 
 function annotationPriority(annotation: AppAnnotation | null): number {

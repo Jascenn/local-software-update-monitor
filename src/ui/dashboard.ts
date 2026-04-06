@@ -33,6 +33,8 @@ export function renderDashboard(
 			--accent: #2f3437;
 			--accent-soft: #f6f5f4;
 			--font-body: "LXGW WenKai", "LXGWWenKai", "霞鹜文楷", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", serif;
+			--font-ui: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+			--font-heading: "LXGW WenKai", "LXGWWenKai", "霞鹜文楷", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", serif;
 		}
 
 		* {
@@ -44,6 +46,8 @@ export function renderDashboard(
 			font-family: var(--font-body);
 			background: var(--bg);
 			color: var(--text);
+			-webkit-font-smoothing: antialiased;
+			text-rendering: optimizeLegibility;
 		}
 
 		main {
@@ -60,6 +64,7 @@ export function renderDashboard(
 
 		h1 {
 			margin: 0;
+			font-family: var(--font-heading);
 			font-size: clamp(2rem, 3.2vw, 2.8rem);
 			line-height: 1.08;
 			letter-spacing: -0.03em;
@@ -98,6 +103,7 @@ export function renderDashboard(
 		.summary .card span {
 			color: var(--muted);
 			font-size: 0.77rem;
+			font-family: var(--font-ui);
 		}
 
 		.summary-card {
@@ -125,6 +131,25 @@ export function renderDashboard(
 			margin-bottom: 16px;
 		}
 
+		.view-switch {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin: 0 0 14px;
+		}
+
+		.view-tab {
+			background: var(--accent-soft);
+			color: var(--text);
+			border: 1px solid transparent;
+		}
+
+		.view-tab.active {
+			background: var(--accent);
+			border-color: var(--accent);
+			color: #ffffff;
+		}
+
 		.section-head {
 			display: flex;
 			align-items: end;
@@ -140,6 +165,7 @@ export function renderDashboard(
 
 		.section-title {
 			margin: 0;
+			font-family: var(--font-heading);
 			font-size: 1.18rem;
 			letter-spacing: -0.03em;
 			font-weight: 650;
@@ -155,8 +181,11 @@ export function renderDashboard(
 		button,
 		input,
 		select,
-		textarea {
-			font: inherit;
+		textarea,
+		option {
+			font-family: var(--font-ui);
+			font-size: inherit;
+			line-height: inherit;
 		}
 
 		button {
@@ -219,6 +248,7 @@ export function renderDashboard(
 			color: var(--muted);
 			font-weight: 600;
 			letter-spacing: 0.04em;
+			font-family: var(--font-ui);
 		}
 
 		input,
@@ -230,6 +260,24 @@ export function renderDashboard(
 			padding: 9px 11px;
 			background: #ffffff;
 			color: var(--text);
+			line-height: 1.45;
+		}
+
+		select {
+			appearance: none;
+			background-image:
+				linear-gradient(45deg, transparent 50%, rgba(55, 53, 47, 0.55) 50%),
+				linear-gradient(135deg, rgba(55, 53, 47, 0.55) 50%, transparent 50%);
+			background-position:
+				calc(100% - 16px) calc(50% - 2px),
+				calc(100% - 10px) calc(50% - 2px);
+			background-size: 6px 6px, 6px 6px;
+			background-repeat: no-repeat;
+			padding-right: 34px;
+		}
+
+		option {
+			font-weight: 500;
 		}
 
 		textarea {
@@ -270,11 +318,13 @@ export function renderDashboard(
 			color: var(--muted);
 			font-size: 0.84rem;
 			line-height: 1.5;
+			font-family: var(--font-ui);
 		}
 
 		.bulk-meta {
 			font-size: 1rem;
 			font-weight: 650;
+			font-family: var(--font-ui);
 		}
 
 		.select-toggle {
@@ -326,6 +376,7 @@ export function renderDashboard(
 			color: inherit;
 			font-weight: 600;
 			font-size: 0.76rem;
+			font-family: var(--font-ui);
 		}
 
 		.table-sort:hover {
@@ -353,6 +404,7 @@ export function renderDashboard(
 			border-radius: 999px;
 			font-size: 0.74rem;
 			font-weight: 600;
+			font-family: var(--font-ui);
 		}
 
 		.badge.up-to-date { background: rgba(47, 123, 65, 0.12); color: var(--ok); }
@@ -380,6 +432,7 @@ export function renderDashboard(
 			color: var(--muted);
 			font-size: 0.86rem;
 			line-height: 1.5;
+			font-family: var(--font-ui);
 		}
 
 		.empty {
@@ -486,6 +539,101 @@ export function renderDashboard(
 			overflow: hidden;
 		}
 
+		.focus-board {
+			display: grid;
+			gap: 14px;
+			margin-bottom: 14px;
+		}
+
+		.focus-section {
+			background: var(--card);
+			border: 1px solid var(--line);
+			border-radius: 10px;
+			padding: 16px;
+		}
+
+		.focus-section-head {
+			display: flex;
+			align-items: baseline;
+			justify-content: space-between;
+			gap: 12px;
+			margin-bottom: 12px;
+		}
+
+		.focus-section-title {
+			font-size: 1rem;
+			font-weight: 650;
+			letter-spacing: -0.02em;
+		}
+
+		.focus-section-note {
+			color: var(--muted);
+			font-size: 0.82rem;
+			font-family: var(--font-ui);
+		}
+
+		.focus-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+			gap: 10px;
+		}
+
+		.focus-card {
+			display: grid;
+			gap: 10px;
+			padding: 14px;
+			border: 1px solid var(--line);
+			border-radius: 10px;
+			background: #ffffff;
+		}
+
+		.focus-card.risk {
+			border-color: rgba(178, 76, 69, 0.18);
+			background: #fffdfd;
+		}
+
+		.focus-card-header {
+			display: flex;
+			align-items: start;
+			justify-content: space-between;
+			gap: 12px;
+		}
+
+		.focus-card-title {
+			font-size: 0.96rem;
+			font-weight: 650;
+			line-height: 1.35;
+		}
+
+		.focus-meta {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 6px;
+		}
+
+		.focus-versions {
+			font-size: 0.86rem;
+			color: var(--muted);
+			font-family: var(--font-ui);
+		}
+
+		.focus-note {
+			font-size: 0.84rem;
+			line-height: 1.55;
+			color: var(--text);
+		}
+
+		.focus-footer {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			align-items: center;
+		}
+
+		.focus-footer .muted {
+			font-size: 0.8rem;
+		}
+
 		.head-stack {
 			display: grid;
 			gap: 6px;
@@ -530,6 +678,7 @@ export function renderDashboard(
 			font-size: 0.73rem;
 			font-weight: 600;
 			text-decoration: none;
+			font-family: var(--font-ui);
 		}
 
 		.version-cell {
@@ -656,8 +805,10 @@ export function renderDashboard(
 			<button id="refreshButton">立即检查</button>
 			<span class="muted">自动轮询间隔：${Math.round(pollIntervalMs / 60_000)} 分钟</span>
 		</div>
+		<div class="view-switch" id="viewTabs"></div>
+		<section id="focusView"></section>
 
-		<section class="card filter-panel">
+		<section class="card filter-panel" id="batchPanel">
 			<div class="section-head compact">
 				<div>
 					<h2 class="section-title">批量标记</h2>
@@ -772,6 +923,7 @@ export function renderDashboard(
 					<span>排序</span>
 					<select id="statusSort">
 						<option value="priority">风险优先</option>
+						<option value="activity">最近活动</option>
 						<option value="name">名称</option>
 						<option value="status">状态</option>
 						<option value="policy">策略</option>
@@ -899,10 +1051,16 @@ export function renderDashboard(
 		let annotations = ${serializedAnnotations};
 		let visibleStatuses = [];
 		let visiblePolicies = [];
+		let visibleFocusStatuses = [];
+		let visibleFocusPolicies = [];
 		let activeAnnotationTarget = null;
 		let selectedTargets = {};
 		let pendingUpgradeIds = {};
 		let activeSummaryShortcut = "";
+
+		const viewState = {
+			mode: "today"
+		};
 
 		const statusState = {
 			quick: "all",
@@ -1151,6 +1309,39 @@ export function renderDashboard(
 			}
 		}
 
+		function formatRelativeDate(value) {
+			if (!value) {
+				return "未记录";
+			}
+
+			try {
+				const target = new Date(value);
+				const diffMs = Date.now() - target.getTime();
+				const diffHours = Math.max(0, Math.round(diffMs / 3_600_000));
+				if (diffHours < 24) {
+					return diffHours <= 1 ? "1 小时内" : diffHours + " 小时前";
+				}
+
+				const diffDays = Math.round(diffHours / 24);
+				if (diffDays < 30) {
+					return diffDays + " 天前";
+				}
+
+				return target.toLocaleDateString();
+			} catch {
+				return String(value);
+			}
+		}
+
+		function dateScore(value) {
+			if (!value) {
+				return 0;
+			}
+
+			const score = new Date(value).getTime();
+			return Number.isFinite(score) ? score : 0;
+		}
+
 		function annotationBadge(annotation) {
 			return annotation
 				? '<span class="badge mark-' + escapeHtml(annotation.mark) + '">' + escapeHtml(markLabel(annotation.mark)) + '</span>'
@@ -1240,6 +1431,47 @@ export function renderDashboard(
 				|| compareText(left.displayName, right.displayName);
 		}
 
+		function hasAttentionAnnotation(annotation) {
+			return Boolean(annotation && annotation.mark !== "ignore");
+		}
+
+		function isRiskStatus(item, annotation) {
+			return item.status === "error"
+				|| item.upgradePolicy !== "normal"
+				|| item.activationSource === "thirdPartyActivated"
+				|| annotation?.mark === "avoid"
+				|| annotation?.mark === "todo"
+				|| annotation?.mark === "watch";
+		}
+
+		function isTodayStatus(item, annotation) {
+			return item.status === "update-available"
+				|| item.status === "error"
+				|| isRiskStatus(item, annotation)
+				|| hasAttentionAnnotation(annotation);
+		}
+
+		function compareByRecentActivity(left, right) {
+			return dateScore(right.lastActivityAt) - dateScore(left.lastActivityAt)
+				|| compareText(left.displayName, right.displayName);
+		}
+
+		function compareTodayPriority(left, right) {
+			return compareByRecentActivity(left, right)
+				|| annotationPriority(findAnnotationForStatus(left)) - annotationPriority(findAnnotationForStatus(right))
+				|| policyRank(left.upgradePolicy) - policyRank(right.upgradePolicy)
+				|| statusRank(left.status) - statusRank(right.status)
+				|| compareText(left.displayName, right.displayName);
+		}
+
+		function compareRiskPriority(left, right) {
+			return annotationPriority(findAnnotationForStatus(left)) - annotationPriority(findAnnotationForStatus(right))
+				|| policyRank(left.upgradePolicy) - policyRank(right.upgradePolicy)
+				|| statusRank(left.status) - statusRank(right.status)
+				|| compareByRecentActivity(left, right)
+				|| compareText(left.displayName, right.displayName);
+		}
+
 		function applyStatusState(items) {
 			const filtered = items.filter((item) => {
 				const annotation = findAnnotationForStatus(item);
@@ -1301,6 +1533,9 @@ export function renderDashboard(
 				switch (statusState.sort) {
 					case "name":
 						comparison = compareText(left.displayName, right.displayName);
+						break;
+					case "activity":
+						comparison = compareByRecentActivity(left, right);
 						break;
 					case "status":
 						comparison = statusRank(left.status) - statusRank(right.status);
@@ -1452,29 +1687,150 @@ export function renderDashboard(
 			).join("");
 		}
 
+		function renderViewTabs() {
+			const node = document.getElementById("viewTabs");
+			const entries = [
+				{ key: "today", label: "今天处理" },
+				{ key: "risk", label: "风险区" },
+				{ key: "inventory", label: "全部资产" }
+			];
+			node.innerHTML = entries.map((item) =>
+				'<button class="view-tab' + (viewState.mode === item.key ? ' active' : '') + '" type="button" data-view-mode="' + escapeHtml(item.key) + '">' + escapeHtml(item.label) + '</button>'
+			).join("");
+		}
+
+		function focusActionHtml(item) {
+			const action = actionStateForStatus(item);
+			const pending = Boolean(pendingUpgradeIds[item.id]);
+
+			if (action.kind === "upgrade") {
+				return '<button class="row-action row-action-upgrade" type="button" data-upgrade-id="' + escapeHtml(item.id) + '"' + (pending ? ' disabled' : '') + '>' + (pending ? '升级中' : '升级') + '</button>';
+			}
+
+			if (action.kind === "link") {
+				return '<a class="row-action" href="' + escapeHtml(item.sourceUrl ?? "") + '" target="_blank" rel="noreferrer">打开来源</a>';
+			}
+
+			return '<button class="ghost row-action" type="button" disabled>' + escapeHtml(action.label) + '</button>';
+		}
+
+		function renderFocusView(node) {
+			if (!snapshot || viewState.mode === "inventory") {
+				visibleFocusStatuses = [];
+				visibleFocusPolicies = [];
+				node.innerHTML = "";
+				node.hidden = true;
+				return;
+			}
+
+			node.hidden = false;
+
+			if (viewState.mode === "today") {
+				const items = snapshot.statuses
+					.filter((item) => isTodayStatus(item, findAnnotationForStatus(item)))
+					.sort(compareTodayPriority)
+					.slice(0, 24);
+				visibleFocusStatuses = items;
+				visibleFocusPolicies = [];
+
+				const cards = items.map((item, index) => {
+					const annotation = findAnnotationForStatus(item);
+					const signals = [
+						'<span class="badge ' + escapeHtml(item.status) + '">' + escapeHtml(statusLabel(item.status)) + '</span>',
+						'<span class="badge ' + escapeHtml(item.upgradePolicy) + '">' + escapeHtml(policyLabel(item.upgradePolicy)) + '</span>',
+						annotation ? annotationBadge(annotation) : "",
+						item.activationSource ? '<span class="property-pill">' + escapeHtml(activationSourceLabel(item.activationSource)) + '</span>' : ""
+					].filter(Boolean).join("");
+					return '<article class="focus-card' + (isRiskStatus(item, annotation) ? ' risk' : '') + '">'
+						+ '<div class="focus-card-header"><div><div class="focus-card-title">' + escapeHtml(item.displayName) + '</div><div class="focus-versions">' + escapeHtml(item.installedVersion ?? "未知") + ' → ' + escapeHtml(item.latestVersion ?? "未知") + '</div></div>' + focusActionHtml(item) + '</div>'
+						+ '<div class="focus-meta">' + signals + '</div>'
+						+ '<div class="focus-note">' + escapeHtml(annotation?.note || item.recommendation || item.policyReason || item.notes || item.error || "暂无额外说明") + '</div>'
+						+ '<div class="focus-footer"><button class="ghost row-action" type="button" data-focus-annotate-index="' + index + '">标记</button><span class="muted">最近活动 ' + escapeHtml(formatRelativeDate(item.lastActivityAt)) + '</span></div>'
+						+ '</article>';
+				}).join("");
+
+				node.innerHTML = '<div class="focus-board"><section class="focus-section"><div class="focus-section-head"><div class="focus-section-title">今天处理</div><div class="focus-section-note">只保留你今天更可能要处理的项目：更新、错误、第三方和手工标记。</div></div><div class="focus-grid">' + (cards || '<div class="empty">当前没有需要处理的项目。</div>') + '</div></section></div>';
+				return;
+			}
+
+			const riskStatuses = snapshot.statuses
+				.filter((item) => isRiskStatus(item, findAnnotationForStatus(item)))
+				.sort(compareRiskPriority)
+				.slice(0, 24);
+			const riskPolicies = [...thirdPartyPolicy]
+				.sort((left, right) => {
+					const leftAnnotation = findAnnotationForPolicy(left);
+					const rightAnnotation = findAnnotationForPolicy(right);
+					return annotationPriority(leftAnnotation) - annotationPriority(rightAnnotation)
+						|| policyRank(left.upgradePolicy) - policyRank(right.upgradePolicy)
+						|| confidenceRank(left.confidence) - confidenceRank(right.confidence)
+						|| compareText(left.name, right.name);
+				})
+				.slice(0, 18);
+			visibleFocusStatuses = riskStatuses;
+			visibleFocusPolicies = riskPolicies;
+
+			const statusCards = riskStatuses.map((item, index) => {
+				const annotation = findAnnotationForStatus(item);
+				return '<article class="focus-card risk">'
+					+ '<div class="focus-card-header"><div><div class="focus-card-title">' + escapeHtml(item.displayName) + '</div><div class="focus-versions">' + escapeHtml(item.installedVersion ?? "未知") + ' → ' + escapeHtml(item.latestVersion ?? "未知") + '</div></div>' + focusActionHtml(item) + '</div>'
+					+ '<div class="focus-meta"><span class="badge ' + escapeHtml(item.status) + '">' + escapeHtml(statusLabel(item.status)) + '</span><span class="badge ' + escapeHtml(item.upgradePolicy) + '">' + escapeHtml(policyLabel(item.upgradePolicy)) + '</span>' + (annotation ? annotationBadge(annotation) : "") + '</div>'
+					+ '<div class="focus-note">' + escapeHtml(annotation?.note || item.policyReason || item.recommendation || item.notes || item.error || "需要人工判断。") + '</div>'
+					+ '<div class="focus-footer"><button class="ghost row-action" type="button" data-focus-annotate-index="' + index + '">标记</button><span class="muted">最近活动 ' + escapeHtml(formatRelativeDate(item.lastActivityAt)) + '</span></div>'
+					+ '</article>';
+			}).join("");
+
+			const policyCards = riskPolicies.map((item, index) => {
+				const annotation = findAnnotationForPolicy(item);
+				return '<article class="focus-card risk">'
+					+ '<div class="focus-card-header"><div><div class="focus-card-title">' + escapeHtml(item.name) + '</div><div class="focus-versions">' + escapeHtml(item.version ?? "未知版本") + '</div></div><button class="ghost row-action" type="button" data-focus-policy-annotate-index="' + index + '">标记</button></div>'
+					+ '<div class="focus-meta"><span class="badge ' + escapeHtml(item.upgradePolicy) + '">' + escapeHtml(policyLabel(item.upgradePolicy)) + '</span><span class="badge unknown">' + escapeHtml(item.confidence === "high" ? "高置信度" : "中置信度") + '</span><span class="badge normal">' + escapeHtml(item.markers.join(", ")) + '</span>' + (annotation ? annotationBadge(annotation) : "") + '</div>'
+					+ '<div class="focus-note">' + escapeHtml(annotation?.note || item.recommendation || item.reason) + '</div>'
+					+ '</article>';
+			}).join("");
+
+			node.innerHTML = '<div class="focus-board">'
+				+ '<section class="focus-section"><div class="focus-section-head"><div class="focus-section-title">高风险与暂缓项</div><div class="focus-section-note">这里集中放第三方激活、暂缓升级、待核验和报错项。</div></div><div class="focus-grid">' + (statusCards || '<div class="empty">当前没有高风险状态项。</div>') + '</div></section>'
+				+ '<section class="focus-section"><div class="focus-section-head"><div class="focus-section-title">第三方审计命中</div><div class="focus-section-note">保留第三方来源卡片，方便你单独处理。</div></div><div class="focus-grid">' + (policyCards || '<div class="empty">当前没有第三方审计结果。</div>') + '</div></section>'
+				+ '</div>';
+		}
+
 		function renderSnapshot() {
 			const summaryNode = document.getElementById("summary");
+			const batchPanelNode = document.getElementById("batchPanel");
+			const focusNode = document.getElementById("focusView");
 			const contentNode = document.getElementById("content");
 			const metaNode = document.getElementById("meta");
 			const statusMetaNode = document.getElementById("statusMeta");
+			const statusPanelNode = document.getElementById("statusPanel");
 			const thirdPartyNode = document.getElementById("thirdPartySection");
 			const policyMetaNode = document.getElementById("policyMeta");
+			const thirdPartyPanelNode = document.getElementById("thirdPartyPanel");
+			const inventoryView = viewState.mode === "inventory";
 
 			renderQuickFilters();
 			renderBulkMeta();
 			syncControlValues();
+			renderViewTabs();
+			batchPanelNode.hidden = !inventoryView;
+			statusPanelNode.hidden = !inventoryView;
+			contentNode.hidden = !inventoryView;
+			thirdPartyPanelNode.hidden = !inventoryView;
+			thirdPartyNode.hidden = !inventoryView;
 
 			if (!snapshot) {
 				summaryNode.innerHTML = "";
 				metaNode.textContent = "还没有执行过检查。";
 				statusMetaNode.textContent = "等待第一次扫描。";
 				contentNode.innerHTML = '<div class="empty">点击“立即检查”开始第一次扫描。</div>';
+				renderFocusView(focusNode);
 				renderThirdPartySection(thirdPartyNode, policyMetaNode);
 				return;
 			}
 
 			metaNode.textContent = "上次检查：" + new Date(snapshot.generatedAt).toLocaleString();
 			renderSummaryCards();
+			renderFocusView(focusNode);
 
 			const filteredStatuses = applyStatusState(snapshot.statuses);
 			visibleStatuses = filteredStatuses;
@@ -1487,7 +1843,9 @@ export function renderDashboard(
 
 			if (!filteredStatuses.length) {
 				contentNode.innerHTML = '<div class="empty">当前筛选条件下没有结果。</div>';
-				renderThirdPartySection(thirdPartyNode, policyMetaNode);
+				if (inventoryView) {
+					renderThirdPartySection(thirdPartyNode, policyMetaNode);
+				}
 				return;
 			}
 
@@ -1529,7 +1887,9 @@ export function renderDashboard(
 				+ '<tbody>' + rows + '</tbody>'
 				+ '</table></div>';
 
-			renderThirdPartySection(thirdPartyNode, policyMetaNode);
+			if (inventoryView) {
+				renderThirdPartySection(thirdPartyNode, policyMetaNode);
+			}
 		}
 
 		function renderThirdPartySection(node, metaNode) {
@@ -1589,6 +1949,8 @@ export function renderDashboard(
 			switch (sortKey) {
 				case "name":
 					return "名称";
+				case "activity":
+					return "最近活动";
 				case "status":
 					return "状态";
 				case "policy":
@@ -1677,40 +2039,48 @@ export function renderDashboard(
 
 			switch (shortcutKey) {
 				case "total":
+					viewState.mode = "inventory";
 					resetStatusFilters();
 					renderSnapshot();
 					scrollToSection("statusPanel");
 					return;
 				case "update-available":
+					viewState.mode = "inventory";
 					resetStatusFilters();
 					statusState.quick = "updates";
 					renderSnapshot();
 					scrollToSection("statusPanel");
 					return;
 				case "up-to-date":
+					viewState.mode = "inventory";
 					resetStatusFilters();
 					statusState.status = "up-to-date";
 					renderSnapshot();
 					scrollToSection("statusPanel");
 					return;
 				case "cautious":
+					viewState.mode = "inventory";
 					resetStatusFilters();
 					statusState.policy = "cautious";
 					renderSnapshot();
 					scrollToSection("statusPanel");
 					return;
 				case "hold":
+					viewState.mode = "inventory";
 					resetStatusFilters();
 					statusState.quick = "hold";
 					renderSnapshot();
 					scrollToSection("statusPanel");
 					return;
 				case "third-party-audit":
+					viewState.mode = "inventory";
+					resetStatusFilters();
 					resetPolicyFilters();
 					renderSnapshot();
 					scrollToSection("thirdPartyPanel");
 					return;
 				case "annotations":
+					viewState.mode = "inventory";
 					resetStatusFilters();
 					resetPolicyFilters();
 					statusState.mark = "annotated";
@@ -1719,6 +2089,7 @@ export function renderDashboard(
 					scrollToSection("statusPanel");
 					return;
 				case "error":
+					viewState.mode = "inventory";
 					resetStatusFilters();
 					statusState.quick = "errors";
 					renderSnapshot();
@@ -1918,12 +2289,45 @@ export function renderDashboard(
 			document.getElementById("bulkClearSelectionButton").addEventListener("click", clearSelectedTargets);
 			document.getElementById("bulkSelectStatusesButton").addEventListener("click", selectVisibleStatuses);
 			document.getElementById("bulkSelectPoliciesButton").addEventListener("click", selectVisiblePolicies);
+			document.getElementById("viewTabs").addEventListener("click", (event) => {
+				const button = event.target.closest("[data-view-mode]");
+				if (!button) {
+					return;
+				}
+				clearSummaryShortcut();
+				viewState.mode = button.getAttribute("data-view-mode");
+				renderSnapshot();
+			});
 			document.getElementById("summary").addEventListener("click", (event) => {
 				const button = event.target.closest("[data-summary-filter]");
 				if (!button) {
 					return;
 				}
 				applySummaryShortcut(button.getAttribute("data-summary-filter"));
+			});
+			document.getElementById("focusView").addEventListener("click", (event) => {
+				const upgradeButton = event.target.closest("[data-upgrade-id]");
+				if (upgradeButton) {
+					void runUpgradeForStatus(upgradeButton.getAttribute("data-upgrade-id"));
+					return;
+				}
+
+				const annotateButton = event.target.closest("[data-focus-annotate-index]");
+				if (annotateButton) {
+					const item = visibleFocusStatuses[Number(annotateButton.getAttribute("data-focus-annotate-index"))];
+					if (item) {
+						openAnnotationDialog(buildStatusTarget(item));
+					}
+					return;
+				}
+
+				const policyAnnotateButton = event.target.closest("[data-focus-policy-annotate-index]");
+				if (policyAnnotateButton) {
+					const item = visibleFocusPolicies[Number(policyAnnotateButton.getAttribute("data-focus-policy-annotate-index"))];
+					if (item) {
+						openAnnotationDialog(buildPolicyTarget(item));
+					}
+				}
 			});
 
 			document.getElementById("statusSearch").addEventListener("input", (event) => {

@@ -14,6 +14,7 @@ export type StatusSortKey =
 	| "status"
 	| "policy"
 	| "channel"
+	| "activity"
 	| "installedVersion"
 	| "latestVersion"
 	| "checkedAt";
@@ -184,6 +185,9 @@ function compareStatusForSort(left: AppStatus, right: AppStatus, query: StatusQu
 			break;
 		case "channel":
 			comparison = compareText(left.channel, right.channel);
+			break;
+		case "activity":
+			comparison = compareNullableText(left.lastActivityAt, right.lastActivityAt);
 			break;
 		case "installedVersion":
 			comparison = compareNullableText(left.installedVersion, right.installedVersion);

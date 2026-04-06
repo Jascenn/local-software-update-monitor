@@ -1,4 +1,4 @@
-import { readdir } from "node:fs/promises";
+import { readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
 
 import type {
@@ -151,9 +151,12 @@ async function walkApplicationBundles(rootPath: string, maxDepth: number): Promi
 
 export async function readAppBundle(appPath: string): Promise<AppBundleRecord | null> {
 	const infoPath = join(appPath, "Contents", "Info.plist");
-	const result = await runCommand("plutil", ["-convert", "json", "-o", "-", infoPath], {
-		timeoutMs: 10_000,
-	});
+	const [result, bundleStat] = await Promise.all([
+		runCommand("plutil", ["-convert", "json", "-o", "-", infoPath], {
+			timeoutMs: 10_000,
+		}),
+		stat(appPath).catch(() => null),
+	]);
 
 	if (!result.ok) {
 		return null;
@@ -172,6 +175,7 @@ export async function readAppBundle(appPath: string): Promise<AppBundleRecord | 
 			path: appPath,
 			bundleId: stringValue(info.CFBundleIdentifier),
 			version: stringValue(info.CFBundleShortVersionString) ?? stringValue(info.CFBundleVersion),
+			lastActivityAt: normalizeActivityDate(bundleStat),
 		};
 	} catch {
 		return null;
@@ -180,6 +184,20 @@ export async function readAppBundle(appPath: string): Promise<AppBundleRecord | 
 
 function stringValue(value: unknown): string | null {
 	return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function normalizeActivityDate(bundleStat: Awaited<ReturnType<typeof stat>> | null): string | null {
+	if (!bundleStat) {
+		return null;
+	}
+
+	const activityAt = bundleStat.atime instanceof Date && Number.isFinite(bundleStat.atime.getTime())
+		? bundleStat.atime
+		: bundleStat.mtime instanceof Date && Number.isFinite(bundleStat.mtime.getTime())
+			? bundleStat.mtime
+			: null;
+
+	return activityAt ? activityAt.toISOString() : null;
 }
 
 export function buildBundleIndexes(appBundles: AppBundleRecord[]): {
