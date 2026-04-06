@@ -1,0 +1,48 @@
+name: Verify
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run check
+
+      - name: Build app
+        run: npm run build
+
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate site files
+        run: |
+          test -f site/index.html
+          test -f site/404.html
+          test -f site/_headers
+          test -f site/assets/dashboard-v0.3.0.png
+
+      - name: Basic content checks
+        run: |
+          grep -q "Lingyi App Watch" site/index.html
+          grep -q "watch.lingyi.tools" site/index.html
+          grep -q "Cloudflare Pages 根目录：\`site\`" site/README.md
