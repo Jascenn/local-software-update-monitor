@@ -140,6 +140,96 @@ export function renderDashboard(
 			margin-bottom: 16px;
 		}
 
+		.review-panel {
+			display: grid;
+			gap: 12px;
+			margin: 0 0 16px;
+			padding: 16px;
+			background: linear-gradient(180deg, #ffffff 0%, #fcfcfb 100%);
+		}
+
+		.review-head {
+			display: flex;
+			align-items: end;
+			justify-content: space-between;
+			gap: 14px;
+		}
+
+		.review-title {
+			margin: 0;
+			font-family: var(--font-heading);
+			font-size: 1.12rem;
+			font-weight: 650;
+			letter-spacing: -0.03em;
+		}
+
+		.review-copy {
+			color: var(--muted);
+			max-width: 760px;
+			font-size: 0.87rem;
+			line-height: 1.55;
+		}
+
+		.review-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+			gap: 10px;
+		}
+
+		.review-card {
+			display: grid;
+			gap: 10px;
+			padding: 14px;
+			border: 1px solid var(--line);
+			border-radius: 10px;
+			background: #ffffff;
+		}
+
+		.review-card.risk {
+			border-color: rgba(178, 76, 69, 0.18);
+			background: #fffdfd;
+		}
+
+		.review-card strong {
+			display: block;
+			font-size: 1.35rem;
+			line-height: 1.1;
+			margin-bottom: 4px;
+			font-family: var(--font-ui);
+		}
+
+		.review-card-title {
+			font-size: 0.92rem;
+			font-weight: 650;
+			line-height: 1.4;
+		}
+
+		.review-card-copy {
+			color: var(--muted);
+			font-size: 0.83rem;
+			line-height: 1.5;
+			font-family: var(--font-ui);
+		}
+
+		.review-actions {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-top: 2px;
+		}
+
+		.review-button {
+			background: #ffffff;
+			color: var(--text);
+			border-color: var(--line-strong);
+			font-size: 0.8rem;
+			padding: 7px 11px;
+		}
+
+		.review-button:hover {
+			background: var(--accent-soft);
+		}
+
 		.view-switch {
 			display: flex;
 			flex-wrap: wrap;
@@ -823,6 +913,7 @@ export function renderDashboard(
 			<span class="muted">自动轮询间隔：${Math.round(pollIntervalMs / 60_000)} 分钟</span>
 		</div>
 		<div class="view-switch" id="viewTabs"></div>
+		<section class="card review-panel" id="reviewPanel" hidden></section>
 		<section id="focusView"></section>
 
 		<section class="card filter-panel" id="batchPanel">
@@ -1485,6 +1576,26 @@ export function renderDashboard(
 				|| compareText(left.displayName, right.displayName);
 		}
 
+		function autoConfiguredStatuses() {
+			return (snapshot?.statuses ?? []).filter((item) => item.id.startsWith("auto-appcast-"));
+		}
+
+		function needsReviewStatuses(items) {
+			return items.filter((item) => {
+				const annotation = findAnnotationForStatus(item);
+				return !annotation && (item.status !== "up-to-date" || item.upgradePolicy !== "normal");
+			});
+		}
+
+		function highRiskAutoStatuses(items) {
+			return items.filter((item) =>
+				item.upgradePolicy === "hold"
+				|| item.activationSource === "thirdPartyActivated"
+				|| item.status === "error"
+				|| item.status === "unknown",
+			);
+		}
+
 		function compareRiskPriority(left, right) {
 			return annotationPriority(findAnnotationForStatus(left)) - annotationPriority(findAnnotationForStatus(right))
 				|| policyRank(left.upgradePolicy) - policyRank(right.upgradePolicy)
@@ -1708,6 +1819,67 @@ export function renderDashboard(
 			).join("");
 		}
 
+		function renderReviewPanel() {
+			const node = document.getElementById("reviewPanel");
+
+			if (!snapshot) {
+				node.hidden = true;
+				node.innerHTML = "";
+				return;
+			}
+
+			const autoStatuses = autoConfiguredStatuses();
+			if (!autoStatuses.length) {
+				node.hidden = true;
+				node.innerHTML = "";
+				return;
+			}
+
+			const reviewStatuses = needsReviewStatuses(autoStatuses);
+			const riskStatuses = highRiskAutoStatuses(autoStatuses);
+			const reviewPolicies = thirdPartyPolicy.filter((item) => !findAnnotationForPolicy(item));
+			const cards = [
+				{
+					key: "auto-configured",
+					title: "已自动接入",
+					value: autoStatuses.length,
+					copy: "第一次启动已经把本机能直接提取更新源的软件先接进来了，不用你手写配置。",
+					button: "查看自动接入"
+				},
+				{
+					key: "needs-review",
+					title: "待你确认",
+					value: reviewStatuses.length,
+					copy: "这些项目还没有人工标记，或者本身就有更新、异常和策略提示，应该优先过一遍。",
+					button: "只看待确认"
+				},
+				{
+					key: "high-risk",
+					title: "高风险项",
+					value: riskStatuses.length,
+					copy: "第三方激活、暂缓升级、异常状态会集中压到这里，先判断这些，再处理普通更新。",
+					button: "打开风险区",
+					risk: true
+				},
+				{
+					key: "third-party-review",
+					title: "第三方待复核",
+					value: reviewPolicies.length,
+					copy: "第三方审计结果已经出来了，但还没写入你的判断，适合逐步补“不要升级”或“待核验”。",
+					button: "查看第三方审计",
+					risk: true
+				}
+			];
+
+			node.hidden = false;
+			node.innerHTML = '<div class="review-head"><div><h2 class="review-title">首次整理建议</h2><div class="review-copy">现在不用先写配置了。系统已经自动生成本地配置，并把能直接识别更新源的软件先接进来。你接下来只需要先确认高风险项，再给敏感软件补几个标记。</div></div></div>'
+				+ '<div class="review-grid">'
+				+ cards.map((item) =>
+					'<article class="review-card' + (item.risk ? ' risk' : '') + '"><div><strong>' + escapeHtml(item.value) + '</strong><div class="review-card-title">' + escapeHtml(item.title) + '</div></div><div class="review-card-copy">' + escapeHtml(item.copy) + '</div><div class="review-actions"><button class="review-button" type="button" data-review-shortcut="' + escapeHtml(item.key) + '">' + escapeHtml(item.button) + '</button></div></article>'
+				).join("")
+				+ '</div>';
+		}
+
 		function renderViewTabs() {
 			const node = document.getElementById("viewTabs");
 			const entries = [
@@ -1822,6 +1994,7 @@ export function renderDashboard(
 			const focusNode = document.getElementById("focusView");
 			const contentNode = document.getElementById("content");
 			const metaNode = document.getElementById("meta");
+			const reviewNode = document.getElementById("reviewPanel");
 			const statusMetaNode = document.getElementById("statusMeta");
 			const statusPanelNode = document.getElementById("statusPanel");
 			const thirdPartyNode = document.getElementById("thirdPartySection");
@@ -1833,6 +2006,7 @@ export function renderDashboard(
 			renderBulkMeta();
 			syncControlValues();
 			renderViewTabs();
+			renderReviewPanel();
 			batchPanelNode.hidden = !inventoryView;
 			statusPanelNode.hidden = !inventoryView;
 			contentNode.hidden = !inventoryView;
@@ -1842,6 +2016,7 @@ export function renderDashboard(
 			if (!snapshot) {
 				summaryNode.innerHTML = "";
 				metaNode.textContent = "还没有执行过检查。";
+				reviewNode.hidden = true;
 				statusMetaNode.textContent = "等待第一次扫描。";
 				contentNode.innerHTML = '<div class="empty">点击“立即检查”开始第一次扫描。</div>';
 				renderFocusView(focusNode);
@@ -2115,6 +2290,52 @@ export function renderDashboard(
 					statusState.quick = "errors";
 					renderSnapshot();
 					scrollToSection("statusPanel");
+					return;
+				default:
+					renderSnapshot();
+					return;
+			}
+		}
+
+		function applyReviewShortcut(shortcutKey) {
+			if (!snapshot) {
+				return;
+			}
+
+			clearSummaryShortcut();
+
+			switch (shortcutKey) {
+				case "auto-configured":
+					viewState.mode = "inventory";
+					resetStatusFilters();
+					statusState.category = "configured";
+					statusState.sort = "activity";
+					statusState.descending = false;
+					renderSnapshot();
+					scrollToSection("statusPanel");
+					return;
+				case "needs-review":
+					viewState.mode = "inventory";
+					resetStatusFilters();
+					statusState.category = "configured";
+					statusState.mark = "unmarked";
+					statusState.sort = "priority";
+					statusState.descending = false;
+					renderSnapshot();
+					scrollToSection("statusPanel");
+					return;
+				case "high-risk":
+					viewState.mode = "risk";
+					renderSnapshot();
+					scrollToSection("focusView");
+					return;
+				case "third-party-review":
+					viewState.mode = "inventory";
+					resetStatusFilters();
+					resetPolicyFilters();
+					policyState.annotation = "unannotated";
+					renderSnapshot();
+					scrollToSection("thirdPartyPanel");
 					return;
 				default:
 					renderSnapshot();
@@ -2397,6 +2618,13 @@ export function renderDashboard(
 					return;
 				}
 				applySummaryShortcut(button.getAttribute("data-summary-filter"));
+			});
+			document.getElementById("reviewPanel").addEventListener("click", (event) => {
+				const button = event.target.closest("[data-review-shortcut]");
+				if (!button) {
+					return;
+				}
+				applyReviewShortcut(button.getAttribute("data-review-shortcut"));
 			});
 			document.getElementById("focusView").addEventListener("click", (event) => {
 				const upgradeButton = event.target.closest("[data-upgrade-id]");
