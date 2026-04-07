@@ -859,6 +859,34 @@ export function renderDashboard(
 			background: var(--card);
 		}
 
+		.back-to-top {
+			position: fixed;
+			right: 20px;
+			bottom: 20px;
+			z-index: 900;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 44px;
+			height: 44px;
+			padding: 0 14px;
+			border-radius: 999px;
+			background: rgba(47, 52, 55, 0.92);
+			border: 1px solid rgba(47, 52, 55, 0.92);
+			color: #ffffff;
+			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+			opacity: 0;
+			pointer-events: none;
+			transform: translateY(8px);
+			transition: opacity 140ms ease, transform 140ms ease;
+		}
+
+		.back-to-top.visible {
+			opacity: 1;
+			pointer-events: auto;
+			transform: translateY(0);
+		}
+
 		.annotation-target {
 			font-size: 1.15rem;
 			font-weight: 700;
@@ -904,7 +932,7 @@ export function renderDashboard(
 	<main>
 		<header>
 			<h1>${title}</h1>
-			<div class="subhead">本地优先的 macOS 软件更新与来源风险看板。自动监控 Homebrew 和 Mac App Store，并用 GitHub Release、官网 Appcast、JSON 接口和第三方下载页补齐版本来源。</div>
+			<div class="subhead">本地优先的 macOS 软件更新看板。系统会先自动接入能识别的更新来源，再把升级风险和你的人工判断放到一张表里。</div>
 			<div class="muted" id="meta"></div>
 		</header>
 		<section class="summary" id="summary"></section>
@@ -916,56 +944,11 @@ export function renderDashboard(
 		<section class="card review-panel" id="reviewPanel" hidden></section>
 		<section id="focusView"></section>
 
-		<section class="card filter-panel" id="batchPanel">
-			<div class="section-head compact">
-				<div>
-					<h2 class="section-title">批量标记</h2>
-					<div class="section-copy">先在主表或第三方卡片里多选，再一次性写入同一个安全标记。适合整批标成“不要升级”或“待核验”。</div>
-				</div>
-			</div>
-			<div class="toolbar-grid">
-				<div class="field wide">
-					<span>当前选择</span>
-					<div class="bulk-meta" id="bulkMeta"></div>
-					<div class="muted">批量操作会写入本地记忆库 data/annotations.json，并参与后续排序和筛选。</div>
-				</div>
-				<label class="field">
-					<span>批量标记</span>
-					<select id="bulkMark">
-						<option value="watch">重点关注</option>
-						<option value="avoid">不要升级</option>
-						<option value="safe">确认可升</option>
-						<option value="todo">待核验</option>
-						<option value="ignore">忽略</option>
-					</select>
-				</label>
-				<label class="field wide">
-					<span>批量备注</span>
-					<input id="bulkNote" type="text" placeholder="可留空；留空时保留原备注，只更新标记。" />
-				</label>
-				<div class="field">
-					<span>操作</span>
-					<div class="button-stack">
-						<button id="bulkApplyButton" type="button">保存到所选</button>
-						<button class="secondary" id="bulkDeleteButton" type="button">清除所选标记</button>
-						<button class="ghost" id="bulkClearSelectionButton" type="button">清空选择</button>
-					</div>
-				</div>
-				<div class="field">
-					<span>快速选择</span>
-					<div class="button-stack">
-						<button class="ghost" id="bulkSelectStatusesButton" type="button">全选当前主表</button>
-						<button class="ghost" id="bulkSelectPoliciesButton" type="button">全选当前第三方</button>
-					</div>
-				</div>
-			</div>
-		</section>
-
 		<section class="card filter-panel" id="statusPanel">
 			<div class="section-head compact">
 				<div>
-					<h2 class="section-title">主监控表</h2>
-					<div class="section-copy">支持按名称、状态、升级策略、来源、类别和你手工写入的标记筛选，也支持按表头或下拉排序。</div>
+					<h2 class="section-title">软件总览</h2>
+					<div class="section-copy">这里是完整的软件资产表。你可以按状态、升级策略、来源、类别和人工判断筛选，也可以直接按表头排序。</div>
 				</div>
 			</div>
 			<div class="toolbar-grid">
@@ -977,10 +960,10 @@ export function renderDashboard(
 					<span>状态</span>
 					<select id="statusFilter">
 						<option value="all">全部状态</option>
-						<option value="update-available">可更新</option>
+						<option value="update-available">待更新</option>
 						<option value="up-to-date">已最新</option>
 						<option value="unknown">未知</option>
-						<option value="error">错误</option>
+						<option value="error">检查异常</option>
 					</select>
 				</label>
 				<label class="field">
@@ -1015,16 +998,16 @@ export function renderDashboard(
 					</select>
 				</label>
 				<label class="field">
-					<span>手工标记</span>
+					<span>人工判断</span>
 					<select id="markFilter">
-						<option value="all">全部标记</option>
+						<option value="all">全部判断</option>
 						<option value="watch">重点关注</option>
 						<option value="avoid">不要升级</option>
 						<option value="safe">确认可升</option>
 						<option value="todo">待核验</option>
 						<option value="ignore">忽略</option>
-						<option value="annotated">已标记</option>
-						<option value="unmarked">未标记</option>
+						<option value="annotated">已写判断</option>
+						<option value="unmarked">未写判断</option>
 					</select>
 				</label>
 				<label class="field">
@@ -1054,11 +1037,56 @@ export function renderDashboard(
 		</section>
 		<section id="content"></section>
 
+		<section class="card filter-panel" id="batchPanel">
+			<div class="section-head compact">
+				<div>
+					<h2 class="section-title">批量写入判断</h2>
+					<div class="section-copy">先在总览表或来源复核卡片里多选，再一次性写入同一个判断。适合整批标成“不要升级”或“待核验”。</div>
+				</div>
+			</div>
+			<div class="toolbar-grid">
+				<div class="field wide">
+					<span>当前选择</span>
+					<div class="bulk-meta" id="bulkMeta"></div>
+					<div class="muted">批量操作会写入本地判断文件 data/annotations.json，并参与后续排序和筛选。</div>
+				</div>
+				<label class="field">
+					<span>批量判断</span>
+					<select id="bulkMark">
+						<option value="watch">重点关注</option>
+						<option value="avoid">不要升级</option>
+						<option value="safe">确认可升</option>
+						<option value="todo">待核验</option>
+						<option value="ignore">忽略</option>
+					</select>
+				</label>
+				<label class="field wide">
+					<span>批量备注</span>
+					<input id="bulkNote" type="text" placeholder="可留空；留空时保留原备注，只更新判断。" />
+				</label>
+				<div class="field">
+					<span>操作</span>
+					<div class="button-stack">
+						<button id="bulkApplyButton" type="button">保存到所选</button>
+						<button class="secondary" id="bulkDeleteButton" type="button">清除所选判断</button>
+						<button class="ghost" id="bulkClearSelectionButton" type="button">清空选择</button>
+					</div>
+				</div>
+				<div class="field">
+					<span>快速选择</span>
+					<div class="button-stack">
+						<button class="ghost" id="bulkSelectStatusesButton" type="button">全选当前总览</button>
+						<button class="ghost" id="bulkSelectPoliciesButton" type="button">全选当前来源复核</button>
+					</div>
+				</div>
+			</div>
+		</section>
+
 		<section class="card filter-panel" id="thirdPartyPanel">
 			<div class="section-head compact">
 				<div>
-					<h2 class="section-title">第三方来源 / 暂缓升级</h2>
-					<div class="section-copy">这组审计结果同样支持搜索、按标记筛选和排序，并且你可以直接在这里写自己的判断和备注。</div>
+					<h2 class="section-title">来源复核</h2>
+					<div class="section-copy">这里专门处理第三方来源和暂缓升级项。你可以快速搜索、复核来源，并补充自己的判断和备注。</div>
 				</div>
 			</div>
 			<div class="toolbar-grid">
@@ -1067,9 +1095,9 @@ export function renderDashboard(
 					<input id="policySearch" type="search" placeholder="比如 macked / CleanShot / QiuChenly" />
 				</label>
 				<label class="field">
-					<span>标记</span>
+					<span>来源标识</span>
 					<select id="policyMarker">
-						<option value="all">全部标记</option>
+						<option value="all">全部标识</option>
 						<option value="macked">macked</option>
 						<option value="tnt">TNT</option>
 						<option value="macwk">MacWK</option>
@@ -1086,11 +1114,11 @@ export function renderDashboard(
 					</select>
 				</label>
 				<label class="field">
-					<span>记忆</span>
+					<span>人工判断</span>
 					<select id="policyAnnotation">
-						<option value="all">全部记忆</option>
-						<option value="annotated">已标记</option>
-						<option value="unannotated">未标记</option>
+						<option value="all">全部判断</option>
+						<option value="annotated">已写判断</option>
+						<option value="unannotated">未写判断</option>
 					</select>
 				</label>
 				<label class="field">
@@ -1119,8 +1147,8 @@ export function renderDashboard(
 		<div class="card annotation-dialog">
 			<div class="section-head compact">
 				<div>
-					<h2 class="section-title">写入记忆</h2>
-					<div class="section-copy">这里保存的是项目本地记忆，写入后会落到 data/annotations.json，后续筛选和 CLI 都会带出来。</div>
+					<h2 class="section-title">添加判断</h2>
+					<div class="section-copy">这里保存的是你对软件的本地判断。写入后会落到 data/annotations.json，后续筛选和 CLI 都会带出来。</div>
 				</div>
 			</div>
 			<div class="toolbar-grid">
@@ -1130,7 +1158,7 @@ export function renderDashboard(
 					<div class="muted" id="annotationTargetMeta"></div>
 				</div>
 				<label class="field">
-					<span>标记</span>
+					<span>判断</span>
 					<select id="annotationMark">
 						<option value="watch">重点关注</option>
 						<option value="avoid">不要升级</option>
@@ -1145,12 +1173,13 @@ export function renderDashboard(
 				</label>
 			</div>
 			<div class="button-stack" style="margin-top: 16px;">
-				<button id="annotationSaveButton" type="button">保存标记</button>
-				<button class="secondary" id="annotationDeleteButton" type="button">清除标记</button>
+				<button id="annotationSaveButton" type="button">保存判断</button>
+				<button class="secondary" id="annotationDeleteButton" type="button">清除判断</button>
 				<button class="ghost" id="annotationCancelButton" type="button">取消</button>
 			</div>
 		</div>
 	</div>
+	<button class="back-to-top" id="backToTopButton" type="button" aria-label="回到顶部">回到顶部</button>
 
 	<script>
 		const pollIntervalMs = ${pollIntervalMs};
@@ -1162,6 +1191,8 @@ export function renderDashboard(
 		let visibleFocusStatuses = [];
 		let visibleFocusPolicies = [];
 		let activeAnnotationTarget = null;
+		let activeAnnotationContext = null;
+		let lastSuggestedAnnotationNote = "";
 		let selectedTargets = {};
 		let selectionAnchors = {
 			status: null,
@@ -1331,6 +1362,66 @@ export function renderDashboard(
 			return findAnnotation(buildPolicyTarget(item));
 		}
 
+		function extractThirdPartyMarkers(context) {
+			if (!context) {
+				return "";
+			}
+
+			if (context.kind === "policy") {
+				return Array.isArray(context.item.markers) ? context.item.markers.join(", ") : "";
+			}
+
+			const reason = String(context.item?.policyReason ?? "");
+			const match = reason.match(/Detected third-party markers:\s*(.+)$/i);
+			return match ? match[1].trim() : "";
+		}
+
+		function suggestedAnnotationNote(mark, target, context) {
+			const name = target?.displayName || "这项软件";
+			const markers = extractThirdPartyMarkers(context);
+
+			switch (mark) {
+				case "avoid":
+					if (markers) {
+						return name + " 检测到 " + markers + " 相关第三方标记，先不要升级。";
+					}
+					if (context?.kind === "status" && context.item?.upgradePolicy === "hold") {
+						return name + " 当前策略是暂缓升级，先保持现状。";
+					}
+					return "先不要升级 " + name + "，等确认来源、授权和兼容性后再处理。";
+				case "safe":
+					if (context?.kind === "status" && context.item?.upgradePolicy === "cautious") {
+						return "已人工确认 " + name + " 当前版本和兼容性，这次可以升级。";
+					}
+					return "已人工确认 " + name + " 可以按正常流程处理。";
+				case "todo":
+					if (markers) {
+						return "需要先核验 " + name + " 的来源和 " + markers + " 相关风险，再决定是否升级。";
+					}
+					if (context?.kind === "status" && context.item?.status === "error") {
+						return name + " 当前检查存在异常，先核验版本来源和更新信息。";
+					}
+					if (context?.kind === "status" && context.item?.status === "unknown") {
+						return name + " 当前版本信息还不完整，先补充核验。";
+					}
+					return "需要先核验 " + name + " 的来源、授权和兼容性，再决定是否处理。";
+				case "ignore":
+					return name + " 暂时不纳入日常处理。";
+				case "watch":
+				default:
+					if (markers) {
+						return name + " 检测到 " + markers + " 相关风险，先重点关注，不要立即处理。";
+					}
+					if (context?.kind === "policy") {
+						return name + " 属于第三方来源项，先重点关注，再决定是否处理。";
+					}
+					if (context?.kind === "status" && context.item?.status === "update-available") {
+						return name + " 已发现新版本，先关注兼容性和来源稳定性。";
+					}
+					return name + " 需要持续关注后续更新和兼容性变化。";
+			}
+		}
+
 		function markLabel(mark) {
 			switch (mark) {
 				case "watch":
@@ -1350,11 +1441,11 @@ export function renderDashboard(
 		function statusLabel(status) {
 			switch (status) {
 				case "update-available":
-					return "可更新";
+					return "待更新";
 				case "up-to-date":
 					return "已最新";
 				case "error":
-					return "错误";
+					return "检查异常";
 				case "unknown":
 				default:
 					return "未知";
@@ -1457,7 +1548,7 @@ export function renderDashboard(
 		function annotationBadge(annotation) {
 			return annotation
 				? '<span class="badge mark-' + escapeHtml(annotation.mark) + '">' + escapeHtml(markLabel(annotation.mark)) + '</span>'
-				: '<span class="muted">未标记</span>';
+				: '<span class="muted">未写判断</span>';
 		}
 
 		function annotationPriority(annotation) {
@@ -1500,7 +1591,7 @@ export function renderDashboard(
 				return { kind: "blocked", label: "已忽略", reason: "这项软件已被你标记为忽略。" };
 			}
 			if (annotation?.mark === "avoid") {
-				return { kind: "blocked", label: "不要升级", reason: "这项软件已被你人工标记为不要升级。" };
+				return { kind: "blocked", label: "不要升级", reason: "这项软件已被你人工判断为不要升级。" };
 			}
 			if (annotation?.mark === "todo") {
 				return { kind: "blocked", label: "待核验", reason: "先做人工核验，再决定是否升级。" };
@@ -1766,10 +1857,10 @@ export function renderDashboard(
 			const statuses = snapshot?.statuses ?? [];
 			const quickFilters = [
 				{ key: "all", label: "全部", count: statuses.length },
-				{ key: "updates", label: "可更新", count: statuses.filter((item) => item.status === "update-available").length },
+				{ key: "updates", label: "待更新", count: statuses.filter((item) => item.status === "update-available").length },
 				{ key: "hold", label: "暂缓升级", count: statuses.filter((item) => item.upgradePolicy === "hold").length },
-				{ key: "third-party", label: "第三方", count: statuses.filter((item) => isThirdPartySource(item.activationSource)).length },
-				{ key: "errors", label: "错误", count: statuses.filter((item) => item.status === "error").length }
+				{ key: "third-party", label: "来源复核", count: statuses.filter((item) => isThirdPartySource(item.activationSource)).length },
+				{ key: "errors", label: "检查异常", count: statuses.filter((item) => item.status === "error").length }
 			];
 
 			node.innerHTML = quickFilters.map((item) =>
@@ -1796,14 +1887,14 @@ export function renderDashboard(
 			}
 
 			return [
-				{ key: "total", label: "总项目", value: snapshot.summary.total },
-				{ key: "update-available", label: "可更新", value: snapshot.summary.updateAvailable },
-				{ key: "up-to-date", label: "最新", value: snapshot.summary.upToDate },
-				{ key: "cautious", label: "监控谨慎", value: snapshot.summary.cautious },
-				{ key: "hold", label: "监控暂缓", value: snapshot.summary.hold },
-				{ key: "third-party-audit", label: "审计第三方", value: thirdPartyPolicy.length },
-				{ key: "annotations", label: "记忆条目", value: annotations.length },
-				{ key: "error", label: "错误", value: snapshot.summary.errors }
+				{ key: "total", label: "软件总数", value: snapshot.summary.total },
+				{ key: "update-available", label: "待更新", value: snapshot.summary.updateAvailable },
+				{ key: "up-to-date", label: "已最新", value: snapshot.summary.upToDate },
+				{ key: "cautious", label: "谨慎处理", value: snapshot.summary.cautious },
+				{ key: "hold", label: "暂缓升级", value: snapshot.summary.hold },
+				{ key: "third-party-audit", label: "来源复核", value: thirdPartyPolicy.length },
+				{ key: "annotations", label: "已写判断", value: annotations.length },
+				{ key: "error", label: "检查异常", value: snapshot.summary.errors }
 			];
 		}
 
@@ -1883,9 +1974,9 @@ export function renderDashboard(
 		function renderViewTabs() {
 			const node = document.getElementById("viewTabs");
 			const entries = [
-				{ key: "today", label: "今天处理" },
-				{ key: "risk", label: "风险区" },
-				{ key: "inventory", label: "全部资产" }
+				{ key: "today", label: "今日待处理" },
+				{ key: "risk", label: "谨慎处理" },
+				{ key: "inventory", label: "软件总览" }
 			];
 			node.innerHTML = entries.map((item) =>
 				'<button class="view-tab' + (viewState.mode === item.key ? ' active' : '') + '" type="button" data-view-mode="' + escapeHtml(item.key) + '">' + escapeHtml(item.label) + '</button>'
@@ -1938,11 +2029,11 @@ export function renderDashboard(
 						+ '<div class="focus-card-header"><div><div class="focus-card-title">' + escapeHtml(item.displayName) + '</div><div class="focus-versions">' + escapeHtml(item.installedVersion ?? "未知") + ' → ' + escapeHtml(item.latestVersion ?? "未知") + '</div></div>' + focusActionHtml(item) + '</div>'
 						+ '<div class="focus-meta">' + signals + '</div>'
 						+ '<div class="focus-note">' + escapeHtml(annotation?.note || item.recommendation || item.policyReason || item.notes || item.error || "暂无额外说明") + '</div>'
-						+ '<div class="focus-footer"><button class="ghost row-action" type="button" data-focus-annotate-index="' + index + '">标记</button><span class="muted">最近活动 ' + escapeHtml(formatRelativeDate(item.lastActivityAt)) + '</span></div>'
+						+ '<div class="focus-footer"><button class="ghost row-action" type="button" data-focus-annotate-index="' + index + '">写判断</button><span class="muted">最近活动 ' + escapeHtml(formatRelativeDate(item.lastActivityAt)) + '</span></div>'
 						+ '</article>';
 				}).join("");
 
-				node.innerHTML = '<div class="focus-board"><section class="focus-section"><div class="focus-section-head"><div class="focus-section-title">今天处理</div><div class="focus-section-note">只保留你今天更可能要处理的项目：更新、错误、第三方和手工标记。</div></div><div class="focus-grid">' + (cards || '<div class="empty">当前没有需要处理的项目。</div>') + '</div></section></div>';
+				node.innerHTML = '<div class="focus-board"><section class="focus-section"><div class="focus-section-head"><div class="focus-section-title">今日待处理</div><div class="focus-section-note">这里只保留你今天更可能要处理的项目：待更新、异常、第三方来源和人工判断项。</div></div><div class="focus-grid">' + (cards || '<div class="empty">当前没有需要处理的项目。</div>') + '</div></section></div>';
 				return;
 			}
 
@@ -1969,22 +2060,22 @@ export function renderDashboard(
 					+ '<div class="focus-card-header"><div><div class="focus-card-title">' + escapeHtml(item.displayName) + '</div><div class="focus-versions">' + escapeHtml(item.installedVersion ?? "未知") + ' → ' + escapeHtml(item.latestVersion ?? "未知") + '</div></div>' + focusActionHtml(item) + '</div>'
 					+ '<div class="focus-meta"><span class="badge ' + escapeHtml(item.status) + '">' + escapeHtml(statusLabel(item.status)) + '</span><span class="badge ' + escapeHtml(item.upgradePolicy) + '">' + escapeHtml(policyLabel(item.upgradePolicy)) + '</span>' + (annotation ? annotationBadge(annotation) : "") + '</div>'
 					+ '<div class="focus-note">' + escapeHtml(annotation?.note || item.policyReason || item.recommendation || item.notes || item.error || "需要人工判断。") + '</div>'
-					+ '<div class="focus-footer"><button class="ghost row-action" type="button" data-focus-annotate-index="' + index + '">标记</button><span class="muted">最近活动 ' + escapeHtml(formatRelativeDate(item.lastActivityAt)) + '</span></div>'
+					+ '<div class="focus-footer"><button class="ghost row-action" type="button" data-focus-annotate-index="' + index + '">写判断</button><span class="muted">最近活动 ' + escapeHtml(formatRelativeDate(item.lastActivityAt)) + '</span></div>'
 					+ '</article>';
 			}).join("");
 
 			const policyCards = riskPolicies.map((item, index) => {
 				const annotation = findAnnotationForPolicy(item);
 				return '<article class="focus-card risk">'
-					+ '<div class="focus-card-header"><div><div class="focus-card-title">' + escapeHtml(item.name) + '</div><div class="focus-versions">' + escapeHtml(item.version ?? "未知版本") + '</div></div><button class="ghost row-action" type="button" data-focus-policy-annotate-index="' + index + '">标记</button></div>'
+					+ '<div class="focus-card-header"><div><div class="focus-card-title">' + escapeHtml(item.name) + '</div><div class="focus-versions">' + escapeHtml(item.version ?? "未知版本") + '</div></div><button class="ghost row-action" type="button" data-focus-policy-annotate-index="' + index + '">写判断</button></div>'
 					+ '<div class="focus-meta"><span class="badge ' + escapeHtml(item.upgradePolicy) + '">' + escapeHtml(policyLabel(item.upgradePolicy)) + '</span><span class="badge unknown">' + escapeHtml(item.confidence === "high" ? "高置信度" : "中置信度") + '</span><span class="badge normal">' + escapeHtml(item.markers.join(", ")) + '</span>' + (annotation ? annotationBadge(annotation) : "") + '</div>'
 					+ '<div class="focus-note">' + escapeHtml(annotation?.note || item.recommendation || item.reason) + '</div>'
 					+ '</article>';
 			}).join("");
 
 			node.innerHTML = '<div class="focus-board">'
-				+ '<section class="focus-section"><div class="focus-section-head"><div class="focus-section-title">高风险与暂缓项</div><div class="focus-section-note">这里集中放第三方激活、暂缓升级、待核验和报错项。</div></div><div class="focus-grid">' + (statusCards || '<div class="empty">当前没有高风险状态项。</div>') + '</div></section>'
-				+ '<section class="focus-section"><div class="focus-section-head"><div class="focus-section-title">第三方审计命中</div><div class="focus-section-note">保留第三方来源卡片，方便你单独处理。</div></div><div class="focus-grid">' + (policyCards || '<div class="empty">当前没有第三方审计结果。</div>') + '</div></section>'
+				+ '<section class="focus-section"><div class="focus-section-head"><div class="focus-section-title">谨慎处理</div><div class="focus-section-note">这里集中放第三方激活、暂缓升级、待核验和报错项。</div></div><div class="focus-grid">' + (statusCards || '<div class="empty">当前没有高风险状态项。</div>') + '</div></section>'
+				+ '<section class="focus-section"><div class="focus-section-head"><div class="focus-section-title">来源复核</div><div class="focus-section-note">保留第三方来源卡片，方便你单独处理。</div></div><div class="focus-grid">' + (policyCards || '<div class="empty">当前没有第三方审计结果。</div>') + '</div></section>'
 				+ '</div>';
 		}
 
@@ -2059,14 +2150,14 @@ export function renderDashboard(
 				const signals = [
 					'<span class="badge ' + escapeHtml(item.status) + '">' + escapeHtml(statusLabel(item.status)) + '</span>',
 					'<span class="badge ' + escapeHtml(item.upgradePolicy) + '">' + escapeHtml(policyLabel(item.upgradePolicy)) + '</span>',
-					annotation ? annotationBadge(annotation) : '<span class="property-pill">未标记</span>'
+					annotation ? annotationBadge(annotation) : '<span class="property-pill">未写判断</span>'
 				].join("");
 				return '<tr class="' + rowClass + '">'
 					+ '<td data-label="选择"><input class="select-toggle" type="checkbox" data-select-status-index="' + index + '"' + (selected ? ' checked' : '') + ' /></td>'
 					+ '<td data-label="应用"><div class="app-cell"><div class="app-title">' + escapeHtml(item.displayName) + '</div><div class="property-row"><span class="property-pill">' + escapeHtml(channelLabel(item.channel)) + '</span>' + (item.activationSource ? '<span class="property-pill">' + escapeHtml(activationSourceLabel(item.activationSource)) + '</span>' : '') + sourceMeta + '</div></div></td>'
 					+ '<td data-label="版本"><div class="version-cell"><div class="version-line"><span>' + escapeHtml(item.installedVersion ?? "未知") + '</span><span class="version-arrow">→</span><span>' + escapeHtml(item.latestVersion ?? "未知") + '</span></div><div class="muted">当前版本 → 最新版本</div></div></td>'
 					+ '<td data-label="信号"><div class="signal-cell"><div class="badge-stack">' + signals + '</div></div></td>'
-					+ '<td data-label="操作">' + actionCellHtml(item) + '<div><button class="ghost row-action" type="button" data-annotate-index="' + index + '">编辑标记</button></div></td>'
+					+ '<td data-label="操作">' + actionCellHtml(item) + '<div><button class="ghost row-action" type="button" data-annotate-index="' + index + '">编辑判断</button></div></td>'
 					+ '<td data-label="说明"><div class="note-cell">' + annotationBlock + '<div class="note-block secondary clamp">' + escapeHtml(detailText || "暂无额外说明") + '</div>' + checkedMeta + '</div></td>'
 					+ '</tr>';
 			}).join("");
@@ -2108,7 +2199,7 @@ export function renderDashboard(
 				const annotation = findAnnotationForPolicy(item);
 				const target = buildPolicyTarget(item);
 				const selected = isSelectedTarget(target);
-				const annotationText = annotation?.note ? '<div class="muted">' + escapeHtml(annotation.note) + '</div>' : '<div class="muted">还没有写入记忆。</div>';
+				const annotationText = annotation?.note ? '<div class="muted">' + escapeHtml(annotation.note) + '</div>' : '<div class="muted">还没有写入人工判断。</div>';
 				return '<article class="policy-card ' + escapeHtml(item.upgradePolicy) + '">'
 					+ '<strong>' + escapeHtml(item.name) + '</strong>'
 					+ '<div class="policy-meta">'
@@ -2122,7 +2213,7 @@ export function renderDashboard(
 					+ '<div class="muted">' + escapeHtml(item.reason) + '</div>'
 					+ annotationText
 					+ '<div class="policy-path">' + escapeHtml(item.path) + '</div>'
-					+ '<div><button class="ghost row-action" type="button" data-policy-annotate-index="' + index + '">标记</button></div>'
+					+ '<div><button class="ghost row-action" type="button" data-policy-annotate-index="' + index + '">编辑判断</button></div>'
 				+ '</article>';
 			}).join("");
 
@@ -2348,18 +2439,24 @@ export function renderDashboard(
 			renderSnapshot();
 		}
 
-		function openAnnotationDialog(target) {
+		function openAnnotationDialog(target, context) {
 			activeAnnotationTarget = target;
+			activeAnnotationContext = context ?? null;
 			const annotation = findAnnotation(target);
+			const mark = annotation?.mark ?? "watch";
+			const suggestedNote = suggestedAnnotationNote(mark, target, activeAnnotationContext);
 			document.getElementById("annotationTargetName").textContent = target.displayName;
 			document.getElementById("annotationTargetMeta").textContent = [target.bundleId ?? "", target.path ?? "", target.appId ?? ""].filter(Boolean).join(" | ");
-			document.getElementById("annotationMark").value = annotation?.mark ?? "watch";
-			document.getElementById("annotationNote").value = annotation?.note ?? "";
+			document.getElementById("annotationMark").value = mark;
+			document.getElementById("annotationNote").value = annotation?.note ?? suggestedNote;
+			lastSuggestedAnnotationNote = annotation?.note ? "" : suggestedNote;
 			document.getElementById("annotationOverlay").classList.add("open");
 		}
 
 		function closeAnnotationDialog() {
 			activeAnnotationTarget = null;
+			activeAnnotationContext = null;
+			lastSuggestedAnnotationNote = "";
 			document.getElementById("annotationOverlay").classList.remove("open");
 		}
 
@@ -2596,6 +2693,11 @@ export function renderDashboard(
 			}
 		}
 
+		function updateBackToTopButton() {
+			const button = document.getElementById("backToTopButton");
+			button.classList.toggle("visible", window.scrollY > 520);
+		}
+
 		function bindControls() {
 			document.getElementById("refreshButton").addEventListener("click", runCheck);
 			document.getElementById("bulkApplyButton").addEventListener("click", applyBulkAnnotation);
@@ -2635,20 +2737,20 @@ export function renderDashboard(
 
 				const annotateButton = event.target.closest("[data-focus-annotate-index]");
 				if (annotateButton) {
-					const item = visibleFocusStatuses[Number(annotateButton.getAttribute("data-focus-annotate-index"))];
-					if (item) {
-						openAnnotationDialog(buildStatusTarget(item));
+						const item = visibleFocusStatuses[Number(annotateButton.getAttribute("data-focus-annotate-index"))];
+						if (item) {
+							openAnnotationDialog(buildStatusTarget(item), { kind: "status", item });
+						}
+						return;
 					}
-					return;
-				}
 
 				const policyAnnotateButton = event.target.closest("[data-focus-policy-annotate-index]");
 				if (policyAnnotateButton) {
-					const item = visibleFocusPolicies[Number(policyAnnotateButton.getAttribute("data-focus-policy-annotate-index"))];
-					if (item) {
-						openAnnotationDialog(buildPolicyTarget(item));
+						const item = visibleFocusPolicies[Number(policyAnnotateButton.getAttribute("data-focus-policy-annotate-index"))];
+						if (item) {
+							openAnnotationDialog(buildPolicyTarget(item), { kind: "policy", item });
+						}
 					}
-				}
 			});
 
 			document.getElementById("statusSearch").addEventListener("input", (event) => {
@@ -2723,7 +2825,7 @@ export function renderDashboard(
 				if (annotateButton) {
 					const item = visibleStatuses[Number(annotateButton.getAttribute("data-annotate-index"))];
 					if (item) {
-						openAnnotationDialog(buildStatusTarget(item));
+						openAnnotationDialog(buildStatusTarget(item), { kind: "status", item });
 					}
 					return;
 				}
@@ -2794,22 +2896,39 @@ export function renderDashboard(
 				}
 				const item = visiblePolicies[Number(annotateButton.getAttribute("data-policy-annotate-index"))];
 				if (item) {
-					openAnnotationDialog(buildPolicyTarget(item));
+					openAnnotationDialog(buildPolicyTarget(item), { kind: "policy", item });
 				}
 			});
 
 			document.getElementById("annotationSaveButton").addEventListener("click", saveAnnotation);
 			document.getElementById("annotationDeleteButton").addEventListener("click", deleteAnnotation);
 			document.getElementById("annotationCancelButton").addEventListener("click", closeAnnotationDialog);
+			document.getElementById("annotationMark").addEventListener("change", (event) => {
+				if (!activeAnnotationTarget) {
+					return;
+				}
+
+				const noteField = document.getElementById("annotationNote");
+				const nextSuggestedNote = suggestedAnnotationNote(event.target.value, activeAnnotationTarget, activeAnnotationContext);
+				if (!noteField.value.trim() || noteField.value === lastSuggestedAnnotationNote) {
+					noteField.value = nextSuggestedNote;
+				}
+				lastSuggestedAnnotationNote = nextSuggestedNote;
+			});
 			document.getElementById("annotationOverlay").addEventListener("click", (event) => {
 				if (event.target.id === "annotationOverlay") {
 					closeAnnotationDialog();
 				}
 			});
+			document.getElementById("backToTopButton").addEventListener("click", () => {
+				window.scrollTo({ top: 0, behavior: "smooth" });
+			});
+			window.addEventListener("scroll", updateBackToTopButton, { passive: true });
 		}
 
 		bindControls();
 		renderSnapshot();
+		updateBackToTopButton();
 		setInterval(refreshSnapshot, Math.max(pollIntervalMs, 60_000));
 	</script>
 </body>
